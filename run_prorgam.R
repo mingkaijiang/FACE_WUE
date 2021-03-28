@@ -1,15 +1,6 @@
 ### Script to analyze WUE database
 ### date created: 18-oct-2020
 
-
-### load packages
-if(!require(pacman))install.packages("pacman")
-pacman::p_load(doBy, 
-               ggplot2,
-               cowplot,
-               metafor,
-               tidyverse)  
-
 ### read in data
 myDF <- read.csv("data/WUEdatabase_checked.csv")
 
