@@ -1,4 +1,22 @@
-### Script to analyze WUE database
+#### Script to analyze field-based CO2 enrichment dataset 
+
+####
+#### Author: Mingkai Jiang
+####
+##########################################################################
+#### Step 1: basic set-up
+#### clear wk space
+rm(list=ls(all=TRUE))
+
+#### Source functions and packages
+source("prepare.R")
+
+##########################################################################
+#### make a global map to show the site distribution
+make_global_map()
+
+
+
 ### date created: 18-oct-2020
 
 ### read in data
