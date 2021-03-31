@@ -31,6 +31,10 @@ sDF <- break_data_by_VPD_bins_and_summarize_response_ratios(myDF)
 fit_multivariate_model_and_plot(sDF)
 
 
+#### make forest plot, based on site-specific prevailing VPD
+make_forest_plot
+
+
 
 
 #### end. 

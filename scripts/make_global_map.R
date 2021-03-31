@@ -11,6 +11,13 @@ make_global_map <- function() {
     plotDF$longitude[plotDF$Location=="Flakaliden"] <- 19.27
     plotDF$latitude[plotDF$Location=="Flakaliden"] <- 64.07
     
+    ### BIFOR FACE incorrect
+    plotDF$longitude[plotDF$Location=="BIFOR FACE"] <- -2.3
+    plotDF$latitude[plotDF$Location=="BIFOR FACE"] <- 52.8
+    
+    
+    ### Richmond
+    plotDF$latitude[plotDF$Location=="Richmond"] <- -33.62
     
     ### read in a global MAT and MAP map
     globDF <- read.csv("data/biome_temp_prec_full_1991_2012.csv")
