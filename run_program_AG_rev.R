@@ -20,6 +20,11 @@ pacman::p_load(doBy,
                plantecophys,
                gdata)  
 
+#### Create output folder
+if(!dir.exists(paste0(getwd(), "/output"))) {
+  dir.create(paste0(getwd(), "/output"), showWarnings = FALSE)
+}
+
 
 ### read in data
 #myDF<- read.csv("WUEdatabase_fixed.csv")
@@ -32,6 +37,18 @@ myDF$WUE <- with(myDF, Photo/Cond)
 myDF$Ci[is.na(myDF$Ci)] <- "200"
 myDF$Ci <- as.numeric(myDF$Ci) # Change Ci back to numeric
 
+### change tree label in sDF2
+myDF$Plantform[myDF$Species=="Phillyrea angustifolia"] <- "tree"
+
+### make CO2 treatment consistent
+myDF$Treatment[myDF$Treatment%in%c("Outside Control", "Control")] <- "Ambient CO2"
+
+myDF$Treatment[myDF$Treatment=="OTC CO2" & myDF$GrowthCa%in%c("Ambient CO2", "Ambient")] <- "Ambient CO2"
+myDF$Treatment[myDF$Treatment=="OTC CO2" & myDF$GrowthCa%in%c("Elevated CO2", "Elevated")] <- "Elevated CO2"
+
+### only include CO2 treatment
+myDF <- myDF[myDF$Treatment %in%c("Ambient CO2", "Elevated CO2"),]
+
 
 ### revise season information
 myDF$Season <- as.factor(myDF$Season)
@@ -39,6 +56,10 @@ myDF$Season <- as.factor(myDF$Season)
 ## Filter to just have the summer season
 myDF <- filter(myDF, Season == "summer")    ##If I just wanted to look  at summer responses.
 myDF<- drop.levels(myDF)
+
+### Bader_ACI_curves_enhancement_ratios dataset has no VPD values, give it a random value
+#myDF$VPD[myDF$Dataset=="Bader_ACI_curves_enhancement_ratios"] <- 1.0
+myDF <- myDF[myDF$Dataset!="Bader_ACI_curves_enhancement_ratios",]
 
 ### G1 values
 myDF$fitgroup<-as.factor(myDF$fitgroup)
@@ -51,8 +72,8 @@ myDF$Location[myDF$Location =="Duke Forest Chapel Hill"] <- "Duke FACE"
 myDF$Location[myDF$Location =="POPFACE Italy"] <- "POPFACE"
 myDF$Location[myDF$Location =="EucFACE Richmond"] <- "EucFACE"
 
-### Bader_ACI_curves_enhancement_ratios dataset has no VPD values, give a random value
-myDF$VPD[myDF$Dataset=="Bader_ACI_curves_enhancement_ratios"] <- 1.0
+### there are two missing values in conductance, ignore them
+myDF <- myDF[complete.cases(myDF$Cond),]
 
 
 graph_all <- function (myDF) {
@@ -68,18 +89,20 @@ graph_all <- function (myDF) {
   #legend(x = 0.00, y = 2.0, legend = levels(myDF$Dataset),col = c(1:10), pch=1)
 }
 
+pdf(paste0(getwd(), "/output/photo_vs_cond.pdf"))
 graph_all(myDF)
-
-
-myDF1 <- subset(myDF, Treatment%in%c("Ambient CO2", "Elevated CO2"))
+dev.off()
 
 ### Let's check VPD distribution in different dataset
-p1 <- ggplot(myDF1, aes(x=VPD))+
+p1 <- ggplot(myDF, aes(x=VPD))+
   geom_histogram(aes(color=Treatment, fill=Treatment), 
                  alpha=0.5, binwidth=0.2)+
-  facet_grid(Dataset ~ .)
+  facet_grid(Dataset ~ ., scales="free")
   
+pdf(paste0(getwd(), "/output/VPD_distribution_by_dataset.pdf"), width=4, height=10)
 plot(p1)
+dev.off()
+
 
 ### To continue the meta-analysis, we will need to decide how to treat different VPD in different dataset and CO2 treatment
 ### Two options:
@@ -87,23 +110,31 @@ plot(p1)
 ###             2. To filter out outliers (i.e. outside 95th percentile), and then calcuklate 
 ### Let's try categorize the dataset into different VPD bins first and see how it goes.
 
-breaks <- c(seq(0, 6.6, 0.2))
+breaks <- c(seq(0, 6.8, 0.4))
 
-tags <- c("[0-0.2)","[0.2-0.4)", "[0.4-0.6)", "[0.6-0.8)", "[0.8-1.0)", 
-          "[1.0-1.2)","[1.2-1.4)", "[1.4-1.6)","[1.6-1.8)", "[1.8-2.0)",
-          "[2.0-2.2)","[2.2-2.4)", "[2.4-2.6)","[2.6-2.8)", "[2.8-3.0)",
-          "[3.0-3.2)","[3.2-3.4)", "[3.4-3.6)","[3.6-3.8)", "[3.8-4.0)",
-          "[4.0-4.2)","[4.2-4.4)", "[4.4-4.6)","[4.6-4.8)", "[4.8-5.0)",
-          "[5.0-5.2)","[5.2-5.4)", "[5.4-5.6)","[5.6-5.8)", "[5.8-6.0)",
-          "[6.0-6.2)","[6.2-6.4)", "[6.4-6.6)")
+#tags <- c("[0-0.2)","[0.2-0.4)", "[0.4-0.6)", "[0.6-0.8)", "[0.8-1.0)", 
+#          "[1.0-1.2)","[1.2-1.4)", "[1.4-1.6)","[1.6-1.8)", "[1.8-2.0)",
+#          "[2.0-2.2)","[2.2-2.4)", "[2.4-2.6)","[2.6-2.8)", "[2.8-3.0)",
+#          "[3.0-3.2)","[3.2-3.4)", "[3.4-3.6)","[3.6-3.8)", "[3.8-4.0)",
+#          "[4.0-4.2)","[4.2-4.4)", "[4.4-4.6)","[4.6-4.8)", "[4.8-5.0)",
+#          "[5.0-5.2)","[5.2-5.4)", "[5.4-5.6)","[5.6-5.8)", "[5.8-6.0)",
+#          "[6.0-6.2)","[6.2-6.4)", "[6.4-6.6)")
 
-myDF1$VPD_group <- cut(myDF1$VPD, 
+
+#tags <- c("[0-0.4)","[0.4-0.8)", "[0.8-1.2)", "[1.2-1.6)", "[1.6-2.0)", 
+#          "[2.0-2.4)","[2.4-2.8)", "[2.8-3.2)","[3.2-3.6)", "[3.6-4.0)",
+#          "[4.0-4.4)","[4.4-4.8)", "[4.8-5.2)","[5.2-5.6)", "[5.6-6.0)",
+#          "[6.0-6.4)","[6.4-6.8)")
+
+tags <- c(seq(0.2, 6.6, 0.4))
+
+myDF$VPD_group <- cut(myDF$VPD, 
                        breaks=breaks, 
                        include.lowest=TRUE, 
                        right=FALSE, 
                        labels=tags)
 
-
+myDF$VPD_group <- as.numeric(as.character(myDF$VPD_group))
 
 ### Data structure:
 ### Experiment >> CO2 treatment >> Tree replicate >> leaf replicate >> Ci concentration
@@ -118,34 +149,38 @@ myDF1$VPD_group <- cut(myDF1$VPD,
 
 ### summary dataset
 sDF1 <- summaryBy(Photo+Cond+WUE+SLA+VPD+CO2S+Ci+PARin~Species+Season+Treatment+Pathway+Type+Plantform+Leafspan+Tregion+Wregion+Growthcond+Location+Country+Dataset+PFT+latitude+longitude+altitude+VPD_group,
-                  FUN=c(mean, sd), data=myDF1, keep.names=T, na.rm=T)
+                  FUN=c(mean, sd), data=myDF, keep.names=T, na.rm=T)
 
-myDF1$Photo.n <- ifelse(is.na(myDF1$Photo), 0, 1)
-myDF1$Cond.n <- ifelse(is.na(myDF1$Cond), 0, 1)
-myDF1$WUE.n <- ifelse(is.na(myDF1$WUE), 0, 1)
-myDF1$SLA.n <- ifelse(is.na(myDF1$SLA), 0, 1)
+myDF$Photo.n <- ifelse(is.na(myDF$Photo), 0, 1)
+myDF$Cond.n <- ifelse(is.na(myDF$Cond), 0, 1)
+myDF$WUE.n <- ifelse(is.na(myDF$WUE), 0, 1)
+myDF$SLA.n <- ifelse(is.na(myDF$SLA), 0, 1)
 
-sDF2 <- summaryBy(Photo.n+Cond.n+WUE.n+SLA.n~Species+Season+Location+Dataset+VPD_group,
-                  FUN=sum, data=myDF1, keep.names=T, na.rm=T)
+sDF2 <- summaryBy(Photo.n+Cond.n+WUE.n+SLA.n~Species+Season+Location+Dataset+Treatment+VPD_group,
+                  FUN=sum, data=myDF, keep.names=T, na.rm=T)
 
 
 ### merge the two
-sDF <- merge(sDF1, sDF2, by=c("Species", "Season", "Location", "Dataset", "VPD_group"))
+sDF <- merge(sDF1, sDF2, by=c("Species", "Season", "Location", "Dataset", 
+                              "Treatment", "VPD_group"))
 
 ### now separate by CO2 treatment
 sDF1 <- sDF[sDF$Treatment == "Ambient CO2",]
 sDF2 <- sDF[sDF$Treatment == "Elevated CO2",]
 
-### remove two extra entries in aCO2 df
-#sDF1 <- sDF1[!is.na(sDF1$Pathway),]
-#sDF1 <- sDF1[!is.na(sDF1$Photo.sd),]
 
-### change tree label in sDF2
-sDF2$Plantform[sDF2$Species=="Phillyrea angustifolia"] <- "tree"
+### check number of samples in aCO2 and eCO2 dataset
+#table(sDF1$Photo.n)
+#table(sDF2$Photo.n)
+#
+#test1 <- subset(sDF1, Photo.n==1)
+#test2 <- subset(sDF2, Photo.n==1)
+#
+#unique(test1$VPD_group)
+#unique(test2$VPD_group)
 
 
 ### merge the two
-
 sDF <- merge(sDF1, sDF2, by=c("Species", "Season", "Location",
                               "Pathway", "Type", "Plantform", "Leafspan",
                               "Tregion", "Wregion", "Growthcond",
@@ -187,7 +222,7 @@ sDF$CO2_resp <- with(sDF, CO2.mean.eCO2/CO2.mean.aCO2)
 ### many data entries has eCO2/aCO2 < 1, that means eCO2 concentration is smaller than
 ### aCO2 concentration. Labelling error?
 
-sDF <- subset(sDF, CO2_resp >= 1)
+sDF <- subset(sDF, CO2_resp > 1)
 
 
 sDF$Photo_resp <- with(sDF, log(Photo.mean.eCO2/Photo.mean.aCO2)/log(CO2_resp))
@@ -259,10 +294,6 @@ p1 <- ggplot(plotDF1) +
 
 plot(p1)
 
-
-### test statistical significance between angiosperm response and gymnosperm response
-### based on heterogeneity test
-# to be filled
 
 
 ### Conductance
