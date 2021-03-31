@@ -22,10 +22,13 @@ myDF <- data_processing_and_formatting()
 fit_g1_values_and_plot(myDF)
 
 
-### break data by vpd groups and summarize response ratios, then plot
-break_data_by_VPD_bins_and_summarize_response_ratios(myDF)
+#### break data by vpd groups and summarize response ratios, then plot
+#### return a summaryDF that calculates mean response ratios at different
+#### VPD bins for different dataset
+sDF <- break_data_by_VPD_bins_and_summarize_response_ratios(myDF)
 
-
+#### us rma.mv function to generate meta-analysis results
+fit_multivariate_model_and_plot(sDF)
 
 
 #### end. 
