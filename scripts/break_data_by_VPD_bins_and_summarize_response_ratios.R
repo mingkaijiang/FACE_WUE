@@ -215,8 +215,6 @@ break_data_by_VPD_bins_and_summarize_response_ratios <- function(inDF) {
         xlab("VPD (kPa)")+
         ylab("Photosynthesis CO2 response")
     
-    plot(p3)
-    
     
     
     p4 <- ggplot(sDF) +
@@ -270,6 +268,11 @@ break_data_by_VPD_bins_and_summarize_response_ratios <- function(inDF) {
     plot(p4)
     plot(p5)
     dev.off()
+    
+    
+    
+    ### return the summarized DF
+    return(sDF)
     
     ### end
 }
