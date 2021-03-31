@@ -8,7 +8,8 @@ pacman::p_load(doBy,
                dplyr,
                tidyverse, 
                plantecophys,
-               gdata) 
+               gdata,
+               viridis) 
 
 
 #### Sourcing all R files in the modules subdirectory

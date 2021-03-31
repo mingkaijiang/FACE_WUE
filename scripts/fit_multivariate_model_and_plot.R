@@ -293,6 +293,33 @@ fit_multivariate_model_and_plot <- function(inDF) {
     save_plot(paste0(getwd(), "/output/predicted_CO2_response_at_VPD_bins_by_PFT.pdf"),
               combined_plot, base_width = 6, base_height=10)
     
+    
+    
+    
+    
+    # Plot the 'mean response of A' versus 'the mean resposne of gsw'.
+    p1 <- ggplot(inDF)+
+        theme_bw()+
+        geom_abline(slope=1, intercept=-1)+
+        geom_smooth(method="lm", aes(Photo_resp, Cond_resp))+
+        geom_point(aes(x=Photo_resp, y = Cond_resp, fill=Location, shape=PFT), size=2)+
+        scale_shape_manual(values=c(21, 24, 22))+
+        scale_fill_viridis(option = "D", discrete = TRUE)+
+        guides(fill=guide_legend(override.aes=list(shape=21)))
+        #scale_x_continuous(expand = c(0, 0),limits=c(-1.5,2.5), breaks=seq(-0.5,2.5,0.5))+
+        #scale_y_continuous(expand = c(0, 0),limits=c(-1.5,2.5), breaks=seq(-1.5,1.5,0.5))+ 
+
+    
+    pdf(paste0(getwd(), "/output/photo_vs_cond_scatterplot.pdf"))
+    plot(p1)
+    dev.off()
+    
+    
+    #tiff('Mean Photo vs mean Cond_scatterplot.tiff', units="in", width=8, height=6, res=500)
+    #plot(p1)
+    #dev.off()
+    
+    
     ### end
 
 }
