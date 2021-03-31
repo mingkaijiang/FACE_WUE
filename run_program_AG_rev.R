@@ -110,7 +110,7 @@ dev.off()
 ###             2. To filter out outliers (i.e. outside 95th percentile), and then calcuklate 
 ### Let's try categorize the dataset into different VPD bins first and see how it goes.
 
-breaks <- c(seq(0, 6.8, 0.4))
+breaks <- c(seq(0, 6.8, 0.2))
 
 #tags <- c("[0-0.2)","[0.2-0.4)", "[0.4-0.6)", "[0.6-0.8)", "[0.8-1.0)", 
 #          "[1.0-1.2)","[1.2-1.4)", "[1.4-1.6)","[1.6-1.8)", "[1.8-2.0)",
@@ -126,7 +126,7 @@ breaks <- c(seq(0, 6.8, 0.4))
 #          "[4.0-4.4)","[4.4-4.8)", "[4.8-5.2)","[5.2-5.6)", "[5.6-6.0)",
 #          "[6.0-6.4)","[6.4-6.8)")
 
-tags <- c(seq(0.2, 6.6, 0.4))
+tags <- c(seq(0.1, 6.7, 0.2))
 
 myDF$VPD_group <- cut(myDF$VPD, 
                        breaks=breaks, 
@@ -251,6 +251,28 @@ sDF$VPDmean <- round((sDF$VPD.mean.aCO2+sDF$VPD.mean.eCO2)/2, 1)
 
 ### replace all inf numbers to NAs
 is.na(sDF) <- do.call(cbind,lapply(sDF, is.infinite))
+
+
+
+### make a plot of CO2 response ratio vs. VPD
+p1 <- ggplot(sDF) +
+  geom_point(aes(VPD_group, Photo_resp, fill=Dataset, group=Dataset), pch=21)+
+  geom_line(aes(VPD_group, Photo_resp, color=Dataset, group=Dataset))+
+  theme_linedraw() +
+  theme(panel.grid.minor=element_blank(),
+        axis.title.x = element_text(size=12), 
+        axis.text.x = element_text(size=12),
+        axis.text.y=element_text(size=12),
+        axis.title.y=element_text(size=12),
+        legend.text=element_text(size=10),
+        legend.title=element_text(size=12),
+        panel.grid.major=element_blank(),
+        legend.position="right",
+        legend.text.align=0)+
+  xlab("VPD (kPa)")+
+  ylab("Photosynthesis CO2 response")
+
+plot(p1)
 
 
 ### Previous response ratos of 1 = wrongly assigned CO2 treatments. 
