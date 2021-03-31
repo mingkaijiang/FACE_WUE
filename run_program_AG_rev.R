@@ -27,8 +27,7 @@ if(!dir.exists(paste0(getwd(), "/output"))) {
 
 
 ### read in data
-#myDF<- read.csv("WUEdatabase_fixed.csv")
-myDF<- read.csv(paste0(getwd(), "/data/WUEdatabase_checked.csv"))
+myDF<- read.csv(paste0(getwd(), "/data/WUEdatabase_fixed.csv"))
 
 ### calculate WUE
 myDF$WUE <- with(myDF, Photo/Cond)
