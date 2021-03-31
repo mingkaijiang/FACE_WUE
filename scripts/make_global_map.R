@@ -1,7 +1,7 @@
 make_global_map <- function() {
     
     ### read in data
-    myDF <- read.csv("data/WUEdatabase_checked.csv")
+    myDF <- read.csv("data/WUEdatabase_fixed.csv")
 
     plotDF <- summaryBy(latitude+longitude+altitude~Location+PFT+Type+Tregion+Wregion, 
                         FUN=mean, data=myDF, na.rm=T, keep.names=T)
