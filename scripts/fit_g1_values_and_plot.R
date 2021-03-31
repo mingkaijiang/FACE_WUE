@@ -34,6 +34,27 @@ fit_g1_values_and_plot <- function(inDF) {
       plot(p1)
       dev.off()
       
+      
+      
+      ## Supplemental figure to show the data distributon with CO2 treatment.
+      p2<- ggplot(inDF, aes(x=Photo/sqrt(VPD)/CO2S, y = Cond, 
+                               shape = Treatment, fill = Treatment))+
+        theme_bw()+
+        geom_point(colour="black")+
+        facet_wrap(~ Dataset, nrow = 3)+
+        scale_shape_manual(values=c(21,24)) +
+        scale_fill_manual(values=c("blue","red"))
+      
+      
+      pdf(paste0(getwd(), "/output/g1_scatterplots_by_dataset.pdf"), width=14, height=10)
+      plot(p2)
+      dev.off()
+      
+      #tiff('G1 Scatterplots_Datasets.tiff', units="in", width=14, height=10, res=500)
+      #plot(p2)
+      #dev.off()
+      
+      
 
       ### plot g1 by dataset
       p2 <- ggplot(g1DF) +

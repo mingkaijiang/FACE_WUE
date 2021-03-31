@@ -252,52 +252,6 @@ dev.off()
 
 
 
-####################################################################################################################
-
-# Plot the 'mean response of A' versus 'the mean resposne of gsw'.
-install.packages("viridis")  # Install
-library("viridis")  
-
-sDF$Location<- as.factor(sDF$Location)
-sDF$Species<- as.factor(sDF$Species)
-
-
-
-graph<- ggplot(sDF, aes(x=Photo_resp, y = Cond_resp, fill=Location, shape=PFT))+
-  theme_bw()+
-  geom_point(size=2)+
-  scale_shape_manual(values=c(21,24, 22))+
-  scale_fill_viridis(option = "D", discrete = TRUE)+
-  guides(fill=guide_legend(override.aes=list(shape=21)))+
-  scale_x_continuous(expand = c(0, 0),limits=c(-0.5,2.5), breaks=seq(-0.5,2.5,0.5))+
-  scale_y_continuous(expand = c(0, 0),limits=c(-1.5,1.5), breaks=seq(-1.5,1.5,0.5))+ 
-  geom_abline(slope=1, intercept=-1); graph
-
-
-tiff('Mean Photo vs mean Cond_scatterplot.tiff', units="in", width=8, height=6, res=500)
-graph
-dev.off()
-
-
-####################################################################################################################
-
-## Supplemental figure to show the data distributon with CO2 treatment.
-
-myDF$Treatment<- as.factor(myDF$Treatment)
-
-
-graph<- ggplot(myDF, aes(x=Photo/sqrt(VPD)/CO2S, y = Cond, 
-       shape = Treatment, fill = Treatment))+
-  theme_bw()+
-  geom_point(colour="black")+
-  facet_wrap(~ Dataset, nrow = 3)+
-  scale_shape_manual(values=c(21,24)) +
-  scale_fill_manual(values=c("blue","red")); graph
-
-
-tiff('G1 Scatterplots_Datasets.tiff', units="in", width=14, height=10, res=500)
-graph
-dev.off()
 
 
 
