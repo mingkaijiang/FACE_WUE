@@ -20,3 +20,12 @@ myDF <- data_processing_and_formatting()
 
 #### fit g1 values
 fit_g1_values_and_plot(myDF)
+
+
+### break data by vpd groups and summarize response ratios, then plot
+break_data_by_VPD_bins_and_summarize_response_ratios(myDF)
+
+
+
+
+#### end. 
