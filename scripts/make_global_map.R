@@ -53,8 +53,8 @@ make_global_map <- function() {
         ylab("Latitude")
     
     
-    pdf("output/global_map.pdf")
-    
+    ### output PDF
+    pdf("output/global_map.pdf", width=8, height=6)
     plot(p1)
     dev.off()
     

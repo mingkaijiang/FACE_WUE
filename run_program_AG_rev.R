@@ -26,72 +26,10 @@ if(!dir.exists(paste0(getwd(), "/output"))) {
 }
 
 
-### read in data
-myDF<- read.csv(paste0(getwd(), "/data/WUEdatabase_fixed.csv"))
-
-### calculate WUE
-myDF$WUE <- with(myDF, Photo/Cond)
-
-### Warren_ORNl dataset has no ci values.# Need to assign one so that it is included n the analysis.
-myDF$Ci[is.na(myDF$Ci)] <- "200"
-myDF$Ci <- as.numeric(myDF$Ci) # Change Ci back to numeric
-
-### change tree label in sDF2
-myDF$Plantform[myDF$Species=="Phillyrea angustifolia"] <- "tree"
-
-### make CO2 treatment consistent
-myDF$Treatment[myDF$Treatment%in%c("Outside Control", "Control")] <- "Ambient CO2"
-
-myDF$Treatment[myDF$Treatment=="OTC CO2" & myDF$GrowthCa%in%c("Ambient CO2", "Ambient")] <- "Ambient CO2"
-myDF$Treatment[myDF$Treatment=="OTC CO2" & myDF$GrowthCa%in%c("Elevated CO2", "Elevated")] <- "Elevated CO2"
-
-### only include CO2 treatment
-myDF <- myDF[myDF$Treatment %in%c("Ambient CO2", "Elevated CO2"),]
 
 
-### revise season information
-myDF$Season <- as.factor(myDF$Season)
-
-## Filter to just have the summer season
-#myDF <- filter(myDF, Season == "summer")    ##If I just wanted to look  at summer responses.
-myDF<- drop.levels(myDF)
-
-### Bader_ACI_curves_enhancement_ratios dataset has no VPD values, give it a random value
-#myDF$VPD[myDF$Dataset=="Bader_ACI_curves_enhancement_ratios"] <- 1.0
-myDF <- myDF[myDF$Dataset!="Bader_ACI_curves_enhancement_ratios",]
-myDF <- myDF[!is.na(myDF$VPD), ]
-
-### G1 values
-myDF$fitgroup<-as.factor(myDF$fitgroup)
-myDF$Dataset<-as.factor(myDF$Dataset)
-myDF<-as.data.frame(myDF)
-
-# Rename locations for plot
-myDF$Location[myDF$Location =="Glencorse near Edinburgh"] <- "Glencorse"
-myDF$Location[myDF$Location =="Duke Forest Chapel Hill"] <- "Duke FACE"
-myDF$Location[myDF$Location =="POPFACE Italy"] <- "POPFACE"
-myDF$Location[myDF$Location =="EucFACE Richmond"] <- "EucFACE"
-
-### there are two missing values in conductance, ignore them
-myDF <- myDF[complete.cases(myDF$Cond),]
 
 
-#graph_all <- function (myDF) {
-#  # checking model fits
-#  list <- split(myDF,myDF$Dataset)
-#  fit <- lapply(list,fitBB,gsmodel="BBOpti",
-#                varnames=list(VPD="VPD",ALEAF="Photo",GS="Cond",Ca="CO2S"))
-#  g1pars <- sapply(fit,function(x)x$coef[[2]])
-#  g1pars <- stack(g1pars)
-#  g1pars
-#  do.call(rbind, lapply(fit, coef))
-#  with(myDF,plot(Photo/sqrt(VPD)/CO2S,Cond,col=Dataset))#, group=Dataset)) #fitgroup
-#  #legend(x = 0.00, y = 2.0, legend = levels(myDF$Dataset),col = c(1:10), pch=1)
-#}
-#
-#pdf(paste0(getwd(), "/output/photo_vs_cond.pdf"))
-#graph_all(myDF)
-#dev.off()
 
 ### Let's check VPD distribution in different dataset
 p1 <- ggplot(myDF, aes(x=VPD))+
