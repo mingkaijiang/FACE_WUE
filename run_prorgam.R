@@ -27,12 +27,21 @@ fit_g1_values_and_plot(myDF)
 #### VPD bins for different dataset
 sDF <- break_data_by_VPD_bins_and_summarize_response_ratios(myDF)
 
+
 #### us rma.mv function to generate meta-analysis results
 fit_multivariate_model_and_plot(sDF)
 
 
 #### make forest plot, based on site-specific prevailing VPD
-make_forest_plot
+
+
+
+#### To do:
+#### 1. Effect of VPD bins - different datasets cover different VPD range, so it may not be appropriate to
+####                         extrapolate CO2 response ratios beyond the site-specific observed VPD ranges.
+#### 2. Do we need to split the data by season? Currently all seasons are lumped together within each dataset.
+#### 3. Forest plot - how do we incorporate the VPD effect and make prediction?
+#### 4. Heterogeneity test - to see whether CO2 response ratios differ significantly among groups (type or PFT).
 
 
 
