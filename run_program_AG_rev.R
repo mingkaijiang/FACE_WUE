@@ -71,10 +71,39 @@ graph_all <- function (myDF) {
 graph_all(myDF)
 
 
-test <- subset(myDF, Dataset=="Bader_ACI_curves_enhancement_ratios")
+myDF1 <- subset(myDF, Treatment%in%c("Ambient CO2", "Elevated CO2"))
+
+### Let's check VPD distribution in different dataset
+p1 <- ggplot(myDF1, aes(x=VPD))+
+  geom_histogram(aes(color=Treatment, fill=Treatment), 
+                 alpha=0.5, binwidth=0.2)+
+  facet_grid(Dataset ~ .)
+  
+plot(p1)
+
+### To continue the meta-analysis, we will need to decide how to treat different VPD in different dataset and CO2 treatment
+### Two options:
+###             1. To bin VPD into categorical bins and then calculate CO2 response ratio within each bin
+###             2. To filter out outliers (i.e. outside 95th percentile), and then calcuklate 
+### Let's try categorize the dataset into different VPD bins first and see how it goes.
+
+breaks <- c(seq(0, 6.6, 0.2))
+
+tags <- c("[0-0.2)","[0.2-0.4)", "[0.4-0.6)", "[0.6-0.8)", "[0.8-1.0)", 
+          "[1.0-1.2)","[1.2-1.4)", "[1.4-1.6)","[1.6-1.8)", "[1.8-2.0)",
+          "[2.0-2.2)","[2.2-2.4)", "[2.4-2.6)","[2.6-2.8)", "[2.8-3.0)",
+          "[3.0-3.2)","[3.2-3.4)", "[3.4-3.6)","[3.6-3.8)", "[3.8-4.0)",
+          "[4.0-4.2)","[4.2-4.4)", "[4.4-4.6)","[4.6-4.8)", "[4.8-5.0)",
+          "[5.0-5.2)","[5.2-5.4)", "[5.4-5.6)","[5.6-5.8)", "[5.8-6.0)",
+          "[6.0-6.2)","[6.2-6.4)", "[6.4-6.6)")
+
+myDF1$VPD_group <- cut(myDF1$VPD, 
+                       breaks=breaks, 
+                       include.lowest=TRUE, 
+                       right=FALSE, 
+                       labels=tags)
 
 
-fit <- fitBB(test, varnames=list(VPD="VPD",ALEAF="Photo",GS="Cond",Ca="CO2S"))
 
 ### Data structure:
 ### Experiment >> CO2 treatment >> Tree replicate >> leaf replicate >> Ci concentration
@@ -88,28 +117,28 @@ fit <- fitBB(test, varnames=list(VPD="VPD",ALEAF="Photo",GS="Cond",Ca="CO2S"))
 ### Let's check first. 
 
 ### summary dataset
-sDF1 <- summaryBy(Photo+Cond+WUE+SLA+VPD+CO2S+Ci+PARin~Species+Season+Treatment+Pathway+Type+Plantform+Leafspan+Tregion+Wregion+Growthcond+Location+Country+Dataset+PFT+latitude+longitude+altitude,
-                  FUN=c(mean, sd), data=myDF, keep.names=T, na.rm=T)
+sDF1 <- summaryBy(Photo+Cond+WUE+SLA+VPD+CO2S+Ci+PARin~Species+Season+Treatment+Pathway+Type+Plantform+Leafspan+Tregion+Wregion+Growthcond+Location+Country+Dataset+PFT+latitude+longitude+altitude+VPD_group,
+                  FUN=c(mean, sd), data=myDF1, keep.names=T, na.rm=T)
 
-myDF$Photo.n <- ifelse(is.na(myDF$Photo), 0, 1)
-myDF$Cond.n <- ifelse(is.na(myDF$Cond), 0, 1)
-myDF$WUE.n <- ifelse(is.na(myDF$WUE), 0, 1)
-myDF$SLA.n <- ifelse(is.na(myDF$SLA), 0, 1)
+myDF1$Photo.n <- ifelse(is.na(myDF1$Photo), 0, 1)
+myDF1$Cond.n <- ifelse(is.na(myDF1$Cond), 0, 1)
+myDF1$WUE.n <- ifelse(is.na(myDF1$WUE), 0, 1)
+myDF1$SLA.n <- ifelse(is.na(myDF1$SLA), 0, 1)
 
-sDF2 <- summaryBy(Photo.n+Cond.n+WUE.n+SLA.n~Species+Season+Location+Dataset,
-                  FUN=sum, data=myDF, keep.names=T, na.rm=T)
+sDF2 <- summaryBy(Photo.n+Cond.n+WUE.n+SLA.n~Species+Season+Location+Dataset+VPD_group,
+                  FUN=sum, data=myDF1, keep.names=T, na.rm=T)
 
 
 ### merge the two
-sDF <- merge(sDF1, sDF2, by=c("Species", "Season", "Location", "Dataset"))
+sDF <- merge(sDF1, sDF2, by=c("Species", "Season", "Location", "Dataset", "VPD_group"))
 
 ### now separate by CO2 treatment
 sDF1 <- sDF[sDF$Treatment == "Ambient CO2",]
 sDF2 <- sDF[sDF$Treatment == "Elevated CO2",]
 
 ### remove two extra entries in aCO2 df
-sDF1 <- sDF1[!is.na(sDF1$Pathway),]
-sDF1 <- sDF1[!is.na(sDF1$Photo.sd),]
+#sDF1 <- sDF1[!is.na(sDF1$Pathway),]
+#sDF1 <- sDF1[!is.na(sDF1$Photo.sd),]
 
 ### change tree label in sDF2
 sDF2$Plantform[sDF2$Species=="Phillyrea angustifolia"] <- "tree"
@@ -121,14 +150,14 @@ sDF <- merge(sDF1, sDF2, by=c("Species", "Season", "Location",
                               "Pathway", "Type", "Plantform", "Leafspan",
                               "Tregion", "Wregion", "Growthcond",
                               "Country", "Dataset", "PFT", "latitude", "longitude",
-                              "altitude"))
+                              "altitude", "VPD_group"))
 
 ### re-label all columns
 colnames(sDF) <- c("Species", "Season", "Location",
                    "Pathway", "Type", "Plantform",
                    "Leafspan", "Tregion", "Wregion", "Growthcond",
                    "Country", "Dataset","PFT", "latitude",
-                   "longitude", "altitude", 
+                   "longitude", "altitude", "VPD_group",
                    "TreatmentA", 
                    "Photo.mean.aCO2", "Cond.mean.aCO2",
                    "WUE.mean.aCO2", "SLA.mean.aCO2", "VPD.mean.aCO2",
@@ -155,6 +184,11 @@ colnames(sDF) <- c("Species", "Season", "Location",
 
 ### calculate response ratio and variance
 sDF$CO2_resp <- with(sDF, CO2.mean.eCO2/CO2.mean.aCO2) 
+### many data entries has eCO2/aCO2 < 1, that means eCO2 concentration is smaller than
+### aCO2 concentration. Labelling error?
+
+sDF <- subset(sDF, CO2_resp >= 1)
+
 
 sDF$Photo_resp <- with(sDF, log(Photo.mean.eCO2/Photo.mean.aCO2)/log(CO2_resp))
 sDF$Cond_resp <- with(sDF, log(Cond.mean.eCO2/Cond.mean.aCO2)/log(CO2_resp))
@@ -174,6 +208,13 @@ sDF$WUE_var <- with(sDF,
                         WUE.sd.aCO2 * WUE.sd.aCO2 / (WUE.n.aCO2 * WUE.mean.aCO2 * WUE.mean.aCO2))/log(CO2_resp))
 
 
+### add continuous factor for VPD values
+sDF$VPDmean <- round((sDF$VPD.mean.aCO2+sDF$VPD.mean.eCO2)/2, 1)
+
+### replace all inf numbers to NAs
+is.na(sDF) <- do.call(cbind,lapply(sDF, is.infinite))
+
+
 ### Previous response ratos of 1 = wrongly assigned CO2 treatments. 
 ## This occured for a) Betula papyrifera,Rhinelander; b) Picea sitchensis, Glencorse, 
                   #c) Populus tremuloides, Rhinelander and the 4 Leuzinger_SCC data points.
@@ -188,19 +229,109 @@ sDF$WUE_var <- with(sDF,
 
 ###################################################################################################################
 
-# iWUE
-test_WUE_DF <- sDF[complete.cases(sDF$WUE_resp),]
-#res_WUE <- rma(WUE_resp, WUE_var, mods = ~sDF$VPD.mean.eCO2, data = test_WUE_DF)
-res_WUE <- rma.mv(WUE_resp, WUE_var, mods = ~VPD.mean.eCO2, data = test_WUE_DF)
+### iWUE
+wueDF <- sDF[complete.cases(sDF$WUE_resp),]
 
-# Cond
+### separate into different vegetation type
+wueDF.ang <- subset(wueDF, Type=="angiosperm")
+wueDF.gym <- subset(wueDF, Type=="gymnosperm")
 
-test_cond_DF <- sDF[complete.cases(sDF$Cond_resp),]
-res_cond <- rma(Cond_resp, Cond_var, mods = ~sDF$VPD.mean.eCO2, data = test_cond_DF)
+
+### multi-variate linear mixed effect model
+res_WUE1 <- rma.mv(WUE_resp, WUE_var, mods = ~VPDmean, random = ~1|Dataset, data = wueDF.ang)
+res_WUE2 <- rma.mv(WUE_resp, WUE_var, mods = ~VPDmean, random = ~1|Dataset, data = wueDF.gym)
+
+### predict effect size, at different VPD values
+predDF1 <- predict(res_WUE1, newmods = c(0.5, 1.0, 1.5), addx=T)
+predDF2 <- predict(res_WUE2, newmods = c(0.5, 1.0, 1.5), addx=T)
+
+predDF1$lab <- "Angiosperm"
+predDF2$lab <- "Gymnosperm"
+
+plotDF1 <- rbind(as.data.frame(predDF1), as.data.frame(predDF2))
+
+### make a plot
+p1 <- ggplot(plotDF1) +
+  geom_col(aes(X.VPDmean, pred, fill=lab, group=lab),
+           position=position_dodge(), col="black")+
+  geom_errorbar(aes(x=X.VPDmean, ymin=pred-se, ymax=pred+se, group=lab), 
+                position=position_dodge(), width = 0.4)
+
+plot(p1)
+
+
+### test statistical significance between angiosperm response and gymnosperm response
+### based on heterogeneity test
+# to be filled
+
+
+### Conductance
+condDF <- sDF[complete.cases(sDF$Cond_resp),]
+
+### separate into different vegetation type
+condDF.ang <- subset(condDF, Type=="angiosperm")
+condDF.gym <- subset(condDF, Type=="gymnosperm")
+
+
+### multi-variate linear mixed effect model
+res_cond1 <- rma.mv(Cond_resp, Cond_var, mods = ~VPDmean, random = ~1|Dataset, data = condDF.ang)
+res_cond2 <- rma.mv(Cond_resp, Cond_var, mods = ~VPDmean, random = ~1|Dataset, data = condDF.gym)
+
+### predict effect size, at different VPD values
+predDF1 <- predict(res_cond1, newmods = c(0.5, 1.0, 1.5), addx=T)
+predDF2 <- predict(res_cond2, newmods = c(0.5, 1.0, 1.5), addx=T)
+
+predDF1$lab <- "Angiosperm"
+predDF2$lab <- "Gymnosperm"
+
+plotDF2 <- rbind(as.data.frame(predDF1), as.data.frame(predDF2))
+
+### make a plot
+p2 <- ggplot(plotDF2) +
+  geom_col(aes(X.VPDmean, pred, fill=lab, group=lab),
+           position=position_dodge(), col="black")+
+  geom_errorbar(aes(x=X.VPDmean, ymin=pred-se, ymax=pred+se, group=lab), 
+                position=position_dodge(), width = 0.4)
+
+plot(p2)
+
+
 
 #Photo
-test_photo_DF <- sDF[complete.cases(sDF$Photo_resp),]
-res_photo <- rma(Photo_resp, Photo_var, mods = ~sDF$VPD.mean.eCO2, data = test_photo_DF)
+photoDF <- sDF[complete.cases(sDF$Photo_resp),]
+
+### separate into different vegetation type
+photoDF.ang <- subset(photoDF, Type=="angiosperm")
+photoDF.gym <- subset(photoDF, Type=="gymnosperm")
+
+
+### multi-variate linear mixed effect model
+res_photo1 <- rma.mv(Photo_resp, Photo_var, mods = ~VPDmean, random = ~1|Dataset, data = photoDF.ang)
+res_photo2 <- rma.mv(Photo_resp, Photo_var, mods = ~VPDmean, random = ~1|Dataset, data = photoDF.gym)
+
+### predict effect size, at different VPD values
+predDF1 <- predict(res_photo1, newmods = c(0.5, 1.0, 1.5), addx=T)
+predDF2 <- predict(res_photo2, newmods = c(0.5, 1.0, 1.5), addx=T)
+
+predDF1$lab <- "Angiosperm"
+predDF2$lab <- "Gymnosperm"
+
+plotDF3 <- rbind(as.data.frame(predDF1), as.data.frame(predDF2))
+
+### make a plot
+p3 <- ggplot(plotDF3) +
+  geom_col(aes(X.VPDmean, pred, fill=lab, group=lab),
+           position=position_dodge(), col="black")+
+  geom_errorbar(aes(x=X.VPDmean, ymin=pred-se, ymax=pred+se, group=lab), 
+                position=position_dodge(), width = 0.4)
+
+plot(p3)
+
+
+
+
+
+
 
 
 
