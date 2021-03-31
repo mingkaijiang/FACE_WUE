@@ -36,8 +36,8 @@ make_global_map <- function() {
     p1 <- ggplot() + 
         geom_tile(data=globDF, aes(y=lat, x=lon, fill=as.character(prec_cat))) +
         coord_quickmap(xlim=xlim.range, ylim=ylim.range)+
-        #borders(database="world", colour="black", lty=1.0)+
-        geom_point(data=plotDF, aes(y=latitude, x=longitude, color=PFT, pch = Type), size=3)+
+        borders(database="world", colour="black", lty=1.0)+
+        geom_point(data=plotDF, aes(y=latitude, x=longitude, color=PFT, pch = Type), size=2)+
         scale_fill_manual(name="Rainfall (mm/yr)", 
                           values=alpha(c("indianred4", "indianred1","thistle1", "skyblue", "blue"),0.2),
                           label=c("0-100", "100-500", "500-2000", "2000-4000", ">4000"))+
