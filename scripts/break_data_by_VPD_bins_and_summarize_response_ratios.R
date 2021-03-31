@@ -24,13 +24,13 @@ break_data_by_VPD_bins_and_summarize_response_ratios <- function(inDF) {
     
     tags <- c(seq(0.1, 6.7, 0.2))
     
-    myDF$VPD_group <- cut(myDF$VPD, 
+    inDF$VPD_group <- cut(inDF$VPD, 
                           breaks=breaks, 
                           include.lowest=TRUE, 
                           right=FALSE, 
                           labels=tags)
     
-    myDF$VPD_group <- as.numeric(as.character(myDF$VPD_group))
+    inDF$VPD_group <- as.numeric(as.character(inDF$VPD_group))
     
     ### Data structure:
     ### Experiment >> CO2 treatment >> Tree replicate >> leaf replicate >> Ci concentration
@@ -45,15 +45,15 @@ break_data_by_VPD_bins_and_summarize_response_ratios <- function(inDF) {
     
     ### summary dataset
     sDF1 <- summaryBy(Photo+Cond+WUE+SLA+VPD+CO2S+Ci+PARin~Species+Season+Treatment+Pathway+Type+Plantform+Leafspan+Tregion+Wregion+Growthcond+Location+Country+Dataset+PFT+latitude+longitude+altitude+VPD_group,
-                      FUN=c(mean, sd), data=myDF, keep.names=T, na.rm=T)
+                      FUN=c(mean, sd), data=inDF, keep.names=T, na.rm=T)
     
-    myDF$Photo.n <- ifelse(is.na(myDF$Photo), 0, 1)
-    myDF$Cond.n <- ifelse(is.na(myDF$Cond), 0, 1)
-    myDF$WUE.n <- ifelse(is.na(myDF$WUE), 0, 1)
-    myDF$SLA.n <- ifelse(is.na(myDF$SLA), 0, 1)
+    inDF$Photo.n <- ifelse(is.na(inDF$Photo), 0, 1)
+    inDF$Cond.n <- ifelse(is.na(inDF$Cond), 0, 1)
+    inDF$WUE.n <- ifelse(is.na(inDF$WUE), 0, 1)
+    inDF$SLA.n <- ifelse(is.na(inDF$SLA), 0, 1)
     
     sDF2 <- summaryBy(Photo.n+Cond.n+WUE.n+SLA.n~Species+Season+Location+Dataset+Treatment+VPD_group,
-                      FUN=sum, data=myDF, keep.names=T, na.rm=T)
+                      FUN=sum, data=inDF, keep.names=T, na.rm=T)
     
     
     ### merge the two
@@ -150,10 +150,11 @@ break_data_by_VPD_bins_and_summarize_response_ratios <- function(inDF) {
     
     
     
-    ### make a plot of CO2 response ratio vs. VPD
-    p1 <- ggplot(sDF) +
-        geom_point(aes(VPD_group, Photo_resp, fill=Dataset, group=Dataset), pch=21)+
-        geom_line(aes(VPD_group, Photo_resp, color=Dataset, group=Dataset))+
+    ### plot density plot of VPD values for each dataset
+    p1 <- ggplot(inDF) +
+        geom_histogram(aes(VPD, fill=Treatment), 
+                       alpha=0.5, position="identity", col="black")+
+        facet_grid(PFT~Dataset, scales="free")+
         theme_linedraw() +
         theme(panel.grid.minor=element_blank(),
               axis.title.x = element_text(size=12), 
@@ -166,7 +167,109 @@ break_data_by_VPD_bins_and_summarize_response_ratios <- function(inDF) {
               legend.position="right",
               legend.text.align=0)+
         xlab("VPD (kPa)")+
+        scale_fill_manual(values=c("Ambient CO2"="blue2",
+                                     "Elevated CO2"="red3"))
+        
+    pdf(paste0(getwd(), "/output/VPD_distribution_by_dataset.pdf"), width=24, height=10)
+    plot(p1)
+    dev.off()
+    
+    
+    ### make a plot of CO2 response ratio at different VPD bins
+   # p2 <- ggplot(sDF) +
+   #     geom_point(aes(VPD_group, Photo_resp, fill=Dataset, group=Dataset), pch=21)+
+   #     geom_smooth(method = "lm", aes(VPD_group, Photo_resp, color=Dataset, group=Dataset),
+   #                 se=F)+
+   #     theme_linedraw() +
+   #     theme(panel.grid.minor=element_blank(),
+   #           axis.title.x = element_text(size=12), 
+   #           axis.text.x = element_text(size=12),
+   #           axis.text.y=element_text(size=12),
+   #           axis.title.y=element_text(size=12),
+   #           legend.text=element_text(size=10),
+   #           legend.title=element_text(size=12),
+   #           panel.grid.major=element_blank(),
+   #           legend.position="right",
+   #           legend.text.align=0)+
+   #     xlab("VPD (kPa)")+
+   #     ylab("Photosynthesis CO2 response")
+    
+    p3 <- ggplot(sDF) +
+        geom_point(aes(VPD_group, Photo_resp, fill=Dataset), pch=21)+
+        geom_errorbar(aes(VPD_group, ymin=Photo_resp-Photo_var, ymax=Photo_resp+Photo_var))+
+        geom_smooth(method = "lm", aes(VPD_group, Photo_resp, col=Dataset),
+                    se=F)+
+        facet_wrap(facet="Dataset", scales="free")+
+        theme_linedraw() +
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_text(size=12),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=10),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              legend.position="none",
+              legend.text.align=0,
+              strip.text.y.left = element_text(angle = 0))+
+        xlab("VPD (kPa)")+
         ylab("Photosynthesis CO2 response")
     
-    plot(p1)
+    plot(p3)
+    
+    
+    
+    p4 <- ggplot(sDF) +
+        geom_point(aes(VPD_group, Cond_resp, fill=Dataset), pch=21)+
+        geom_errorbar(aes(VPD_group, ymin=Cond_resp-Cond_var, ymax=Cond_resp+Cond_var))+
+        geom_smooth(method = "lm", aes(VPD_group, Cond_resp, col=Dataset),
+                    se=F)+
+        facet_wrap(facet="Dataset", scales="free")+
+        theme_linedraw() +
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_text(size=12),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=10),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              legend.position="none",
+              legend.text.align=0,
+              strip.text.y.left = element_text(angle = 0))+
+        xlab("VPD (kPa)")+
+        ylab("Conductance CO2 response")
+    
+    
+    
+    p5 <- ggplot(sDF) +
+        geom_point(aes(VPD_group, WUE_resp, fill=Dataset), pch=21)+
+        geom_errorbar(aes(VPD_group, ymin=WUE_resp-WUE_var, ymax=WUE_resp+WUE_var))+
+        geom_smooth(method = "lm", aes(VPD_group, WUE_resp, col=Dataset),
+                    se=F)+
+        facet_wrap(facet="Dataset", scales="free")+
+        theme_linedraw() +
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_text(size=12),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=10),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              legend.position="none",
+              legend.text.align=0,
+              strip.text.y.left = element_text(angle = 0))+
+        xlab("VPD (kPa)")+
+        ylab("WUE CO2 response")
+    
+    
+    
+    pdf(paste0(getwd(), "/output/CO2_responses_at_VPD_bins.pdf"), width=12, height=12)
+    plot(p3)
+    plot(p4)
+    plot(p5)
+    dev.off()
+    
+    ### end
 }
