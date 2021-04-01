@@ -199,6 +199,7 @@ break_data_by_VPD_bins_and_summarize_response_ratios <- function(inDF) {
         geom_errorbar(aes(VPD_group, ymin=Photo_resp-Photo_var, ymax=Photo_resp+Photo_var))+
         geom_smooth(method = "lm", aes(VPD_group, Photo_resp, col=Dataset),
                     se=F)+
+        geom_abline(intercept=1, slope=0)+
         facet_wrap(facet="Dataset", scales="free")+
         theme_linedraw() +
         theme(panel.grid.minor=element_blank(),
@@ -222,6 +223,7 @@ break_data_by_VPD_bins_and_summarize_response_ratios <- function(inDF) {
         geom_errorbar(aes(VPD_group, ymin=Cond_resp-Cond_var, ymax=Cond_resp+Cond_var))+
         geom_smooth(method = "lm", aes(VPD_group, Cond_resp, col=Dataset),
                     se=F)+
+        geom_abline(intercept=0, slope=0)+
         facet_wrap(facet="Dataset", scales="free")+
         theme_linedraw() +
         theme(panel.grid.minor=element_blank(),
