@@ -28,8 +28,15 @@ fit_g1_values_and_plot(myDF)
 sDF <- break_data_by_VPD_bins_and_summarize_response_ratios(myDF)
 
 
+### perform leave one out analysis
+perform_leave_one_out_analysis(sDF)
+
+
 #### us rma.mv function to generate meta-analysis results
 fit_multivariate_model_and_plot(sDF)
+
+
+### 
 
 
 #### make forest plot, based on site-specific prevailing VPD
