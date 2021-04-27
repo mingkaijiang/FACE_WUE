@@ -150,29 +150,7 @@ break_data_by_VPD_bins_and_summarize_response_ratios <- function(inDF) {
     
     
     
-    ### plot density plot of VPD values for each dataset
-    p1 <- ggplot(inDF) +
-        geom_histogram(aes(VPD, fill=Treatment), 
-                       alpha=0.5, position="identity", col="black")+
-        facet_grid(PFT~Dataset, scales="free")+
-        theme_linedraw() +
-        theme(panel.grid.minor=element_blank(),
-              axis.title.x = element_text(size=12), 
-              axis.text.x = element_text(size=12),
-              axis.text.y=element_text(size=12),
-              axis.title.y=element_text(size=12),
-              legend.text=element_text(size=10),
-              legend.title=element_text(size=12),
-              panel.grid.major=element_blank(),
-              legend.position="right",
-              legend.text.align=0)+
-        xlab("VPD (kPa)")+
-        scale_fill_manual(values=c("Ambient CO2"="blue2",
-                                     "Elevated CO2"="red3"))
-        
-    pdf(paste0(getwd(), "/output/VPD_distribution_by_dataset.pdf"), width=24, height=10)
-    plot(p1)
-    dev.off()
+    
     
     
     ### make a plot of CO2 response ratio at different VPD bins

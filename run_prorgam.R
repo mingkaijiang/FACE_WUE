@@ -21,6 +21,9 @@ myDF <- data_processing_and_formatting()
 #### fit g1 values
 fit_g1_values_and_plot(myDF)
 
+### plot site-specific climatic conditions
+plot_site_specific_climate(myDF)
+
 
 #### break data by vpd groups and summarize response ratios, then plot
 #### return a summaryDF that calculates mean response ratios at different
