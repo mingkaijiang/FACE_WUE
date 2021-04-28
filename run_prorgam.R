@@ -46,9 +46,7 @@ analysis_1_no_VPD_bins(myDF)
 #### break data by VPD groups and summarize response ratios, 
 #### Standardized VPD bins based on user specification
 analysis_2_standardized_VPD_bins(myDF, 
-                                 vpd.brks=c(seq(0, 6.8, 0.2)))
-
-
+                                 vpd.brks=c(seq(0, 7.0, 0.5)))
 
 
 ### perform leave one out analysis

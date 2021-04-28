@@ -43,6 +43,10 @@ data_processing_and_formatting <- function() {
     myDF$Location[myDF$Location =="POPFACE Italy"] <- "POPFACE"
     myDF$Location[myDF$Location =="EucFACE Richmond"] <- "EucFACE"
     
+    # Tregion
+    myDF$Tregion <- ifelse(myDF$Tregion=="temperate", "Temperate",
+                           myDF$Tregion)
+    
     ### there are two missing values in conductance, ignore them
     myDF <- myDF[complete.cases(myDF$Cond),]
     
