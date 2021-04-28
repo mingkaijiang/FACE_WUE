@@ -49,6 +49,13 @@ analysis_2_standardized_VPD_bins(myDF,
                                  vpd.brks=c(seq(0, 7.0, 0.5)))
 
 
+
+#### break data by VPD groups and summarize response ratios, 
+#### VPD bins based on dataset range
+analysis_2_standardized_VPD_bins(myDF, 
+                                 vpd.brks=c(seq(0, 7.0, 0.5)))
+
+
 ### perform leave one out analysis
 perform_leave_one_out_analysis(sDF)
 

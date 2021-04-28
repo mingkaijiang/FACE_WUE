@@ -112,9 +112,9 @@ analysis_2_standardized_VPD_bins <- function(inDF, vpd.brks) {
   
     ### make VPD bins and means check
     p1 <- ggplot(sDF) +
-        geom_point(aes(VPD_group, VPDmean, fill=Dataset), pch=21)+
+        geom_point(aes(VPD_group, VPDmean, fill=Type), pch=21)+
         geom_abline(slope=1,intercept=0)+
-        geom_smooth(method = "lm", aes(VPD_group, VPDmean, color=Dataset, group=Dataset),
+        geom_smooth(method = "lm", aes(VPD_group, VPDmean, color=Type, group=Type),
                     se=F)+
         theme_linedraw() +
         theme(panel.grid.minor=element_blank(),
@@ -130,11 +130,21 @@ analysis_2_standardized_VPD_bins <- function(inDF, vpd.brks) {
         xlab("VPD category (kPa)")+
         ylab("VPD mean (kPa)")
     
-    p2 <- ggplot(sDF) +
-        geom_point(aes(VPD_group, Photo_resp, fill=Dataset, group=Dataset), pch=21)+
-        geom_smooth(method = "lm", aes(VPD_group, Photo_resp, color=Dataset, group=Dataset),
+    
+    ### get a subset dataset based on VPD range
+    ang.vpd <- range(sDF$VPD_group[sDF$Type=="angiosperm"])
+    gym.vpd <- range(sDF$VPD_group[sDF$Type=="gymnosperm"])
+    vpd.range <- c(max(ang.vpd[1], gym.vpd[1]), min(ang.vpd[2], gym.vpd[2]))
+    
+    subDF <- subset(sDF, VPD_group <= max(vpd.range) & VPD_group >= min(vpd.range))
+    
+    
+    ### make some plots
+    p3 <- ggplot(sDF) +
+        geom_point(aes(VPD_group, Photo_resp, fill=Dataset, group=Dataset, pch=Type))+
+        geom_smooth(method = "lm", aes(VPD_group, Photo_resp, color=Type),
                     se=F)+
-        geom_abline(slope=0, intercept=3, lty=2)+
+        #geom_abline(slope=0, intercept=3, lty=2)+
         geom_abline(slope=0, intercept=1, lty=1)+
         theme_linedraw() +
         theme(panel.grid.minor=element_blank(),
@@ -145,12 +155,157 @@ analysis_2_standardized_VPD_bins <- function(inDF, vpd.brks) {
               legend.text=element_text(size=10),
               legend.title=element_text(size=12),
               panel.grid.major=element_blank(),
-              legend.position="right",
+              legend.position="none",
               legend.text.align=0)+
         xlab("VPD (kPa)")+
-        ylab("Photosynthesis CO2 response")
+        ylab("Photosynthesis CO2 response")+
+      scale_shape_manual(name="Type",
+                         values=c("angiosperm"=21,
+                                  "gymnosperm"=22))
+      
     
     
+    p4 <- ggplot(sDF) +
+      geom_point(aes(VPD_group, Cond_resp, fill=Dataset, pch=Type))+
+      geom_smooth(method = "lm", aes(VPD_group, Cond_resp, color=Type, group=Type),
+                  se=F)+
+      geom_abline(slope=0, intercept=0, lty=1)+
+      theme_linedraw() +
+      theme(panel.grid.minor=element_blank(),
+            axis.title.x = element_text(size=12), 
+            axis.text.x = element_text(size=12),
+            axis.text.y=element_text(size=12),
+            axis.title.y=element_text(size=12),
+            legend.text=element_text(size=10),
+            legend.title=element_text(size=12),
+            panel.grid.major=element_blank(),
+            legend.position="none",
+            legend.text.align=0)+
+      xlab("VPD (kPa)")+
+      ylab("Conductance CO2 response")+
+      scale_shape_manual(name="Type",
+                         values=c("angiosperm"=21,
+                                  "gymnosperm"=22))
+    
+    
+    
+    p5 <- ggplot(sDF) +
+      geom_point(aes(VPD_group, WUE_resp, fill=Dataset, pch=Type))+
+      geom_smooth(method = "lm", aes(VPD_group, WUE_resp, color=Type, group=Type),
+                  se=F)+
+      geom_abline(slope=0, intercept=1, lty=1)+
+      theme_linedraw() +
+      theme(panel.grid.minor=element_blank(),
+            axis.title.x = element_text(size=12), 
+            axis.text.x = element_text(size=12),
+            axis.text.y=element_text(size=12),
+            axis.title.y=element_text(size=12),
+            legend.text=element_text(size=10),
+            legend.title=element_text(size=12),
+            panel.grid.major=element_blank(),
+            legend.position="none",
+            legend.text.align=0)+
+      xlab("VPD (kPa)")+
+      ylab("WUE CO2 response")+
+      scale_shape_manual(name="Type",
+                         values=c("angiosperm"=21,
+                                  "gymnosperm"=22))
+    
+    
+    
+    ### subset plots
+    p6 <- ggplot(subDF) +
+      geom_point(aes(VPD_group, Photo_resp, fill=Dataset, group=Dataset, pch=Type))+
+      geom_smooth(method = "lm", aes(VPD_group, Photo_resp, color=Type),
+                  se=F)+
+      geom_abline(slope=0, intercept=1, lty=1)+
+      theme_linedraw() +
+      theme(panel.grid.minor=element_blank(),
+            axis.title.x = element_text(size=12), 
+            axis.text.x = element_text(size=12),
+            axis.text.y=element_text(size=12),
+            axis.title.y=element_text(size=12),
+            legend.text=element_text(size=10),
+            legend.title=element_text(size=12),
+            panel.grid.major=element_blank(),
+            legend.position="none",
+            legend.text.align=0)+
+      xlab("VPD (kPa)")+
+      ylab("Photosynthesis CO2 response")+
+      scale_shape_manual(name="Type",
+                         values=c("angiosperm"=21,
+                                  "gymnosperm"=22))
+    
+    
+    
+    p7 <- ggplot(subDF) +
+      geom_point(aes(VPD_group, Cond_resp, fill=Dataset, pch=Type))+
+      geom_smooth(method = "lm", aes(VPD_group, Cond_resp, color=Type, group=Type),
+                  se=F)+
+      geom_abline(slope=0, intercept=0, lty=1)+
+      theme_linedraw() +
+      theme(panel.grid.minor=element_blank(),
+            axis.title.x = element_text(size=12), 
+            axis.text.x = element_text(size=12),
+            axis.text.y=element_text(size=12),
+            axis.title.y=element_text(size=12),
+            legend.text=element_text(size=10),
+            legend.title=element_text(size=12),
+            panel.grid.major=element_blank(),
+            legend.position="none",
+            legend.text.align=0)+
+      xlab("VPD (kPa)")+
+      ylab("Conductance CO2 response")+
+      scale_shape_manual(name="Type",
+                         values=c("angiosperm"=21,
+                                  "gymnosperm"=22))
+    
+    
+    
+    p8 <- ggplot(subDF) +
+      geom_point(aes(VPD_group, WUE_resp, fill=Dataset, pch=Type))+
+      geom_smooth(method = "lm", aes(VPD_group, WUE_resp, color=Type, group=Type),
+                  se=F)+
+      geom_abline(slope=0, intercept=1, lty=1)+
+      theme_linedraw() +
+      theme(panel.grid.minor=element_blank(),
+            axis.title.x = element_text(size=12), 
+            axis.text.x = element_text(size=12),
+            axis.text.y=element_text(size=12),
+            axis.title.y=element_text(size=12),
+            legend.text=element_text(size=10),
+            legend.title=element_text(size=12),
+            panel.grid.major=element_blank(),
+            legend.position="none",
+            legend.text.align=0)+
+      xlab("VPD (kPa)")+
+      ylab("WUE CO2 response")+
+      scale_shape_manual(name="Type",
+                         values=c("angiosperm"=21,
+                                  "gymnosperm"=22))
+    
+    
+    legend_shared <- get_legend(p3 + theme(legend.position="bottom",
+                                           legend.box = 'horizontal',
+                                           legend.box.just = 'left'))
+    
+    combined_plot <- plot_grid(p3, p6, 
+                               p4, p7, 
+                               p5, p8,
+                               labels="AUTO",
+                               ncol=2, align="vh", axis = "l",
+                               label_x=0.8, label_y=0.95,
+                               label_size = 18)
+    
+    
+    pdf(paste0(getwd(), "/output/CO2_responses_at_generalized_VPD_bins_all.pdf"),
+        width=12, height=10)
+    plot_grid(combined_plot, legend_shared, ncol=1, rel_heights=c(1,0.4))
+    dev.off()  
+    
+    
+    
+    ### individual datasets
     p3 <- ggplot(sDF) +
         geom_point(aes(VPD_group, Photo_resp, fill=Dataset), pch=21)+
         geom_errorbar(aes(VPD_group, ymin=Photo_resp-Photo_var, ymax=Photo_resp+Photo_var))+
@@ -232,7 +387,7 @@ analysis_2_standardized_VPD_bins <- function(inDF, vpd.brks) {
     dev.off()
 
     
-    #### Now make forest plot
+    #### Now make forest plot based on the entire dataset
     wueDF <- sDF[complete.cases(sDF$WUE_resp),]
     wueDF <- wueDF[order(wueDF$Type, wueDF$VPD_group, wueDF$Dataset),]
     wueDF.ang <- subset(wueDF, Type=="angiosperm")
@@ -305,6 +460,89 @@ analysis_2_standardized_VPD_bins <- function(inDF, vpd.brks) {
     forest(res_WUE, slab=wueDF$Dataset, 
            at=c(-1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5),
            ilab=cbind(wueDF$Type, wueDF$VPDmean),
+           ilab.xpos=c(-3.0,-1.5), 
+           cex=0.6)
+    text(c(-3.0,-1.5), l1+3, c("Type", "Mean VPD"),
+         cex=0.7)
+    text(4, l1+3, "Relative Response [95% CI]", pos = 2, cex = 0.7)
+    
+    dev.off()
+    
+    
+    
+    #### Now make forest plot based on the vpd range dataset
+    wueDF <- subDF[complete.cases(subDF$WUE_resp),]
+    wueDF <- wueDF[order(wueDF$Type, wueDF$VPD_group, wueDF$Dataset),]
+    wueDF.ang <- subset(wueDF, Type=="angiosperm")
+    wueDF.gym <- subset(wueDF, Type=="gymnosperm")
+    l1 <- length(wueDF$Dataset)
+    ns1 <- length(unique(wueDF$Dataset))
+    
+    condDF <- subDF[complete.cases(subDF$Cond_resp),]
+    condDF <- wueDF[order(condDF$Type, condDF$VPD_group, condDF$Dataset),]
+    condDF.ang <- subset(condDF, Type=="angiosperm")
+    condDF.gym <- subset(condDF, Type=="gymnosperm")
+    l2 <- length(condDF$Dataset)
+    ns2 <- length(unique(condDF$Dataset))
+    
+    photoDF <- subDF[complete.cases(subDF$Photo_resp),]
+    photoDF <- wueDF[order(photoDF$Type, photoDF$VPD_group, photoDF$Dataset),]
+    photoDF.ang <- subset(photoDF, Type=="angiosperm")
+    photoDF.gym <- subset(photoDF, Type=="gymnosperm")
+    l3 <- length(photoDF$Dataset)
+    ns3 <- length(unique(photoDF$Dataset))
+    
+    
+    ### make forest plots
+    pdf(paste0(getwd(), "/output/forest_plot_generalized_VPD_bins_WUE_subset_analysis.pdf"),
+        width=12, height=10)
+    
+    ### make the simplest forest plot model
+    ## WUE
+    res_WUE <- rma.uni(WUE_resp, WUE_var, data = wueDF)
+    
+    forest(res_WUE, slab=wueDF$Dataset, 
+           at=c(-1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5),
+           ilab=cbind(wueDF$Type, wueDF$VPD_group),
+           ilab.xpos=c(-3.0,-1.5), 
+           cex=0.6)
+    text(c(-3.0,-1.5), l1+3, c("Type", "Mean VPD"),
+         cex=0.7)
+    text(4, l1+3, "Relative Response [95% CI]", pos = 2, cex = 0.7)
+    
+    
+    ### add dataset as a random factor
+    ## WUE
+    res_WUE <- rma.mv(WUE_resp, WUE_var, random = ~1|Dataset, data = wueDF)
+    
+    forest(res_WUE, slab=wueDF$Dataset, 
+           at=c(-1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5),
+           ilab=cbind(wueDF$Type, wueDF$VPD_group),
+           ilab.xpos=c(-3.0,-1.5), 
+           cex=0.6)
+    text(c(-3.0,-1.5), l1+3, c("Type", "Mean VPD"),
+         cex=0.7)
+    text(4, l1+3, "Relative Response [95% CI]", pos = 2, cex = 0.7)
+    
+    
+    ### add moderator: vegetation type
+    res_WUE <- rma.mv(WUE_resp, WUE_var, mods = ~Type, random = ~1|Dataset, data = wueDF)
+    
+    forest(res_WUE, slab=wueDF$Dataset, 
+           at=c(-1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5),
+           ilab=cbind(wueDF$Type, wueDF$VPD_group),
+           ilab.xpos=c(-3.0,-1.5), 
+           cex=0.6)
+    text(c(-3.0,-1.5), l1+3, c("Type", "Mean VPD"),
+         cex=0.7)
+    text(4, l1+3, "Relative Response [95% CI]", pos = 2, cex = 0.7)
+    
+    
+    res_WUE <- rma.mv(WUE_resp, WUE_var, mods = ~Type*VPD_group, random = ~1|Dataset, data = wueDF)
+    
+    forest(res_WUE, slab=wueDF$Dataset, 
+           at=c(-1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5),
+           ilab=cbind(wueDF$Type, wueDF$VPD_group),
            ilab.xpos=c(-3.0,-1.5), 
            cex=0.6)
     text(c(-3.0,-1.5), l1+3, c("Type", "Mean VPD"),
