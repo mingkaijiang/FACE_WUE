@@ -21,9 +21,34 @@ myDF <- data_processing_and_formatting()
 #### fit g1 values
 fit_g1_values_and_plot(myDF)
 
-### plot site-specific climatic conditions
+#### plot site-specific climatic conditions
 plot_site_specific_climate(myDF)
 
+#### perform generalized additive model analysis to understand the 
+#### relationship between VPD and WUE
+perform_generalized_additive_model_for_each_dataset(myDF)
+
+### notes: the above relationships indicate that, VPD bins should be
+### study-specific. 
+### Also, in additon to the likely influence if VPD, 
+### some datasets have treatment differences in Tair and PAR.
+### So in the model, we may need to consider these effects as well. 
+### Below we will explore several ways of binning the VPD data:
+### 1. no binning
+### 2. a general bnning scheme of user-defined interval
+### 3. a study-specific binning scheme
+### We may need to remove outliers to further increase confidence in the analysis...
+
+#### 1. no binning, assuming site-specific VPD is the site's prevailing VPD range
+
+
+
+### perform leave one out analysis
+perform_leave_one_out_analysis(sDF)
+
+
+### us rma.mv function to generate meta-analysis results
+fit_multivariate_model_and_plot(sDF)
 
 #### break data by vpd groups and summarize response ratios, then plot
 #### return a summaryDF that calculates mean response ratios at different
@@ -31,12 +56,7 @@ plot_site_specific_climate(myDF)
 sDF <- break_data_by_VPD_bins_and_summarize_response_ratios(myDF)
 
 
-### perform leave one out analysis
-perform_leave_one_out_analysis(sDF)
 
-
-#### us rma.mv function to generate meta-analysis results
-fit_multivariate_model_and_plot(sDF)
 
 
 ### 
