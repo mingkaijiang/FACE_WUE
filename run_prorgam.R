@@ -40,6 +40,14 @@ perform_generalized_additive_model_for_each_dataset(myDF)
 ### We may need to remove outliers to further increase confidence in the analysis...
 
 #### 1. no binning, assuming site-specific VPD is the site's prevailing VPD range
+analysis_1_no_VPD_bins(myDF)
+
+
+#### break data by VPD groups and summarize response ratios, 
+#### Standardized VPD bins based on user specification
+analysis_2_standardized_VPD_bins(myDF, 
+                                 vpd.brks=c(seq(0, 6.8, 0.2)))
+
 
 
 
@@ -50,20 +58,11 @@ perform_leave_one_out_analysis(sDF)
 ### us rma.mv function to generate meta-analysis results
 fit_multivariate_model_and_plot(sDF)
 
-#### break data by vpd groups and summarize response ratios, then plot
-#### return a summaryDF that calculates mean response ratios at different
-#### VPD bins for different dataset
-sDF <- break_data_by_VPD_bins_and_summarize_response_ratios(myDF)
-
-
-
-
 
 ### 
 
 
 #### make forest plot, based on site-specific prevailing VPD
-
 
 
 #### To do:

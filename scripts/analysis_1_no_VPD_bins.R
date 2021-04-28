@@ -34,8 +34,6 @@ analysis_1_no_VPD_bins <- function(inDF) {
     #sDF$WUE.n <- tmpDF$WUE.n
     
     
-    
-    
     ### now separate by CO2 treatment
     sDF1 <- sDF[sDF$Treatment == "Ambient CO2",]
     sDF2 <- sDF[sDF$Treatment == "Elevated CO2",]
@@ -59,27 +57,21 @@ analysis_1_no_VPD_bins <- function(inDF) {
                        "WUE.sd.aCO2", "SLA.sd.aCO2","VPD.sd.aCO2",
                        "CO2.sd.aCO2", "Ci.sd.aCO2",
                        "PARin.sd.aCO2", "Tair.sd.aCO2", "Tleaf.sd.aCO2",
-                       "Photo.n.aCO2", "Cond.n.aCO2",
-                       "WUE.n.aCO2", "SLA.n.aCO2", 
+                       "Photo.n.aCO2", "Cond.n.aCO2", "WUE.n.aCO2", 
                        "TreatmentE", 
                        "Photo.mean.eCO2", "Cond.mean.eCO2",
                        "WUE.mean.eCO2", "SLA.mean.eCO2","VPD.mean.eCO2",
                        "CO2.mean.eCO2", "Ci.mean.eCO2",
-                       "PARin.mean.eCO2", 
+                       "PARin.mean.eCO2", "Tair.mean.eCO2", "Tleaf.mean.eCO2",
                        "Photo.sd.eCO2", "Cond.sd.eCO2",
                        "WUE.sd.eCO2", "SLA.sd.eCO2","VPD.sd.eCO2",
                        "CO2.sd.eCO2", "Ci.sd.eCO2",
-                       "PARin.sd.eCO2", 
-                       "Photo.n.eCO2", "Cond.n.eCO2",
-                       "WUE.n.eCO2", "SLA.n.eCO2")
+                       "PARin.sd.eCO2", "Tair.sd.eCO2", "Tleaf.sd.eCO2",
+                       "Photo.n.eCO2", "Cond.n.eCO2","WUE.n.eCO2")
     
     
     ### calculate response ratio and variance
     sDF$CO2_resp <- with(sDF, CO2.mean.eCO2/CO2.mean.aCO2) 
-    ### many data entries has eCO2/aCO2 < 1, that means eCO2 concentration is smaller than
-    ### aCO2 concentration. Labelling error?
-    
-    sDF <- subset(sDF, CO2_resp > 1)
     
     
     ### calculate response ratios
@@ -110,111 +102,207 @@ analysis_1_no_VPD_bins <- function(inDF) {
     is.na(sDF) <- do.call(cbind,lapply(sDF, is.infinite))
     
     
+    # Plot the 'mean response of A' versus 'the mean resposne of gsw'.
+    p1 <- ggplot(sDF)+
+        theme_bw()+
+        geom_abline(slope=1, intercept=-1)+
+        geom_smooth(method="lm", aes(Photo_resp, Cond_resp))+
+        geom_point(aes(x=Photo_resp, y = Cond_resp, fill=Dataset, shape=PFT), size=2)+
+        scale_shape_manual(values=c(21, 24, 22))+
+        scale_fill_viridis(option = "D", discrete = TRUE)+
+        guides(fill=guide_legend(override.aes=list(shape=21)))
+    #scale_x_continuous(expand = c(0, 0),limits=c(-1.5,2.5), breaks=seq(-0.5,2.5,0.5))+
+    #scale_y_continuous(expand = c(0, 0),limits=c(-1.5,2.5), breaks=seq(-1.5,1.5,0.5))+ 
     
     
-    
-    
-    ### make a plot of CO2 response ratio at different VPD bins
-   # p2 <- ggplot(sDF) +
-   #     geom_point(aes(VPD_group, Photo_resp, fill=Dataset, group=Dataset), pch=21)+
-   #     geom_smooth(method = "lm", aes(VPD_group, Photo_resp, color=Dataset, group=Dataset),
-   #                 se=F)+
-   #     theme_linedraw() +
-   #     theme(panel.grid.minor=element_blank(),
-   #           axis.title.x = element_text(size=12), 
-   #           axis.text.x = element_text(size=12),
-   #           axis.text.y=element_text(size=12),
-   #           axis.title.y=element_text(size=12),
-   #           legend.text=element_text(size=10),
-   #           legend.title=element_text(size=12),
-   #           panel.grid.major=element_blank(),
-   #           legend.position="right",
-   #           legend.text.align=0)+
-   #     xlab("VPD (kPa)")+
-   #     ylab("Photosynthesis CO2 response")
-    
-    p3 <- ggplot(sDF) +
-        geom_point(aes(VPD_group, Photo_resp, fill=Dataset), pch=21)+
-        geom_errorbar(aes(VPD_group, ymin=Photo_resp-Photo_var, ymax=Photo_resp+Photo_var))+
-        geom_smooth(method = "lm", aes(VPD_group, Photo_resp, col=Dataset),
-                    se=F)+
-        geom_abline(intercept=1, slope=0)+
-        facet_wrap(facet="Dataset", scales="free")+
-        theme_linedraw() +
-        theme(panel.grid.minor=element_blank(),
-              axis.title.x = element_text(size=12), 
-              axis.text.x = element_text(size=12),
-              axis.text.y=element_text(size=12),
-              axis.title.y=element_text(size=12),
-              legend.text=element_text(size=10),
-              legend.title=element_text(size=12),
-              panel.grid.major=element_blank(),
-              legend.position="none",
-              legend.text.align=0,
-              strip.text.y.left = element_text(angle = 0))+
-        xlab("VPD (kPa)")+
-        ylab("Photosynthesis CO2 response")
-    
-    
-    
-    p4 <- ggplot(sDF) +
-        geom_point(aes(VPD_group, Cond_resp, fill=Dataset), pch=21)+
-        geom_errorbar(aes(VPD_group, ymin=Cond_resp-Cond_var, ymax=Cond_resp+Cond_var))+
-        geom_smooth(method = "lm", aes(VPD_group, Cond_resp, col=Dataset),
-                    se=F)+
-        geom_abline(intercept=0, slope=0)+
-        facet_wrap(facet="Dataset", scales="free")+
-        theme_linedraw() +
-        theme(panel.grid.minor=element_blank(),
-              axis.title.x = element_text(size=12), 
-              axis.text.x = element_text(size=12),
-              axis.text.y=element_text(size=12),
-              axis.title.y=element_text(size=12),
-              legend.text=element_text(size=10),
-              legend.title=element_text(size=12),
-              panel.grid.major=element_blank(),
-              legend.position="none",
-              legend.text.align=0,
-              strip.text.y.left = element_text(angle = 0))+
-        xlab("VPD (kPa)")+
-        ylab("Conductance CO2 response")
-    
-    
-    
-    p5 <- ggplot(sDF) +
-        geom_point(aes(VPD_group, WUE_resp, fill=Dataset), pch=21)+
-        geom_errorbar(aes(VPD_group, ymin=WUE_resp-WUE_var, ymax=WUE_resp+WUE_var))+
-        geom_smooth(method = "lm", aes(VPD_group, WUE_resp, col=Dataset),
-                    se=F)+
-        geom_abline(intercept=1, slope=0)+
-        facet_wrap(facet="Dataset", scales="free")+
-        theme_linedraw() +
-        theme(panel.grid.minor=element_blank(),
-              axis.title.x = element_text(size=12), 
-              axis.text.x = element_text(size=12),
-              axis.text.y=element_text(size=12),
-              axis.title.y=element_text(size=12),
-              legend.text=element_text(size=10),
-              legend.title=element_text(size=12),
-              panel.grid.major=element_blank(),
-              legend.position="none",
-              legend.text.align=0,
-              strip.text.y.left = element_text(angle = 0))+
-        xlab("VPD (kPa)")+
-        ylab("WUE CO2 response")
-    
-    
-    
-    pdf(paste0(getwd(), "/output/CO2_responses_at_VPD_bins.pdf"), width=12, height=12)
-    plot(p3)
-    plot(p4)
-    plot(p5)
+    pdf(paste0(getwd(), "/output/photo_vs_cond_scatterplot.pdf"))
+    plot(p1)
     dev.off()
     
     
     
-    ### return the summarized DF
-    return(sDF)
+    ### make plots
+    p1 <- ggplot(sDF,aes(VPDmean, Photo_resp)) +
+        geom_point(aes(VPDmean, Photo_resp, fill=Dataset), pch=21, size=4)+
+        geom_errorbar(aes(VPDmean, ymin=Photo_resp-Photo_var, ymax=Photo_resp+Photo_var))+
+        geom_smooth(method = "gam", formula = y ~s(x, bs = "cs"), 
+                    se=T)+
+        geom_abline(intercept=1, slope=0)+
+        theme_linedraw() +
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_text(size=12),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=10),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              legend.position="none",
+              legend.text.align=0,
+              strip.text.y.left = element_text(angle = 0))+
+        xlab("VPD (kPa)")+
+        ylab("Photosynthesis CO2 response")+
+        ylim(c(-2,2.2))
+    
+
+    p2 <- ggplot(sDF,aes(VPDmean, Cond_resp)) +
+        geom_point(aes(VPDmean, Cond_resp, fill=Dataset), pch=21, size=4)+
+        geom_errorbar(aes(VPDmean, ymin=Cond_resp-Cond_var, ymax=Cond_resp+Cond_var))+
+        geom_smooth(method = "gam", formula = y ~s(x, bs = "cs"), 
+                    se=T)+
+        geom_abline(intercept=0, slope=0)+
+        theme_linedraw() +
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_text(size=12),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=10),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              legend.position="none",
+              legend.text.align=0,
+              strip.text.y.left = element_text(angle = 0))+
+        xlab("VPD (kPa)")+
+        ylab("Conductance CO2 response")+
+        ylim(c(-2,2.2))
+    
+    
+    p3 <- ggplot(sDF,aes(VPDmean, WUE_resp)) +
+        geom_point(aes(VPDmean, WUE_resp, fill=Dataset), pch=21, size=4)+
+        geom_errorbar(aes(VPDmean, ymin=WUE_resp-WUE_var, ymax=WUE_resp+WUE_var))+
+        geom_smooth(method = "gam", formula = y ~s(x, bs = "cs"), 
+                    se=T)+
+        geom_abline(intercept=1, slope=0)+
+        theme_linedraw() +
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_text(size=12),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=10),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              legend.position="none",
+              legend.text.align=0,
+              strip.text.y.left = element_text(angle = 0))+
+        xlab("VPD (kPa)")+
+        ylab("WUE CO2 response")+
+        ylim(c(-2,2.2))
+    
+    
+    legend_shared <- get_legend(p1 + theme(legend.position="bottom",
+                                           legend.box = 'horizontal',
+                                           legend.box.just = 'left'))
+    
+    combined_plot <- plot_grid(p1, p2, p3, 
+                                labels="AUTO",
+                                ncol=3, align="vh", axis = "l",
+                                label_x=0.8, label_y=0.95,
+                                label_size = 18)
+    
+
+    pdf(paste0(getwd(), "/output/CO2_responses_no_VPD_bins.pdf"),
+        width=12, height=10)
+    plot_grid(combined_plot, legend_shared, ncol=1, rel_heights=c(1,0.4))
+    dev.off()  
+    
+    
+    ######################### forest plot ###############################
+    
+    ### Now make forest plot
+    wueDF <- sDF[complete.cases(sDF$WUE_resp),]
+    wueDF <- wueDF[order(wueDF$Type, wueDF$PFT),]
+    wueDF.ang <- subset(wueDF, Type=="angiosperm")
+    wueDF.gym <- subset(wueDF, Type=="gymnosperm")
+    l1 <- length(wueDF$Dataset)
+    ns1 <- length(unique(wueDF$Dataset))
+    
+    condDF <- sDF[complete.cases(sDF$Cond_resp),]
+    condDF <- wueDF[order(condDF$Type, condDF$PFT),]
+    condDF.ang <- subset(condDF, Type=="angiosperm")
+    condDF.gym <- subset(condDF, Type=="gymnosperm")
+    l2 <- length(condDF$Dataset)
+    ns2 <- length(unique(condDF$Dataset))
+    
+    photoDF <- sDF[complete.cases(sDF$Photo_resp),]
+    photoDF <- wueDF[order(photoDF$Type, photoDF$PFT),]
+    photoDF.ang <- subset(photoDF, Type=="angiosperm")
+    photoDF.gym <- subset(photoDF, Type=="gymnosperm")
+    l3 <- length(photoDF$Dataset)
+    ns3 <- length(unique(photoDF$Dataset))
+    
+    
+    ### make forest plots
+    pdf(paste0(getwd(), "/output/forest_plot_no_VPD_bins_WUE_analysis.pdf"),
+        width=12, height=10)
+    
+    ### make the simplest forest plot model
+    ## WUE
+    res_WUE <- rma.uni(WUE_resp, WUE_var, data = wueDF)
+
+    forest(res_WUE, slab=wueDF$Dataset, 
+           at=c(0.0, 0.5, 1.0, 1.5, 2.0, 2.5),
+           ilab=cbind(wueDF$PFT, wueDF$Season, wueDF$Species, wueDF$VPDmean),
+           ilab.xpos=c(-1.3,-1.0,-0.5, 3.0), cex=0.6)
+    text(c(-1.8,-1.3,-1.0,-0.5, 3.0), l1+3, c("Dataset", 
+                                              "PFT",
+                                              "Season",
+                                              "Species",
+                                              "Mean VPD"),
+         cex=0.7)
+    text(4, l1+3, "Relative Response [95% CI]", pos = 2, cex = 0.7)
+
+    
+    ### add dataset as a random factor
+    ## WUE
+    res_WUE <- rma.mv(WUE_resp, WUE_var, random = ~1|Dataset, data = wueDF)
+    
+    forest(res_WUE, slab=wueDF$Dataset, 
+           at=c(0.0, 0.5, 1.0, 1.5, 2.0, 2.5),
+           ilab=cbind(wueDF$PFT, wueDF$Season, wueDF$Species, wueDF$VPDmean),
+           ilab.xpos=c(-1.3,-1.0,-0.5, 3.0), cex=0.6)
+    text(c(-1.8,-1.3,-1.0,-0.5, 3.0), l1+3, c("Dataset", 
+                                              "PFT",
+                                              "Season",
+                                              "Species",
+                                              "Mean VPD"),
+         cex=0.7)
+    text(4, l1+3, "Relative Response [95% CI]", pos = 2, cex = 0.7)
+
+    
+    ### add moderator: vegetation type
+    res_WUE <- rma.mv(WUE_resp, WUE_var, mods = ~Type, random = ~1|Dataset, data = wueDF)
+
+    forest(res_WUE, slab=wueDF$Dataset, 
+           at=c(0.0, 0.5, 1.0, 1.5, 2.0, 2.5),
+           ilab=cbind(wueDF$PFT, wueDF$Season, wueDF$Species, wueDF$VPDmean),
+           ilab.xpos=c(-1.3,-1.0,-0.5, 3.0), cex=0.6)
+    text(c(-1.8,-1.3,-1.0,-0.5, 3.0), l1+3, c("Dataset", 
+                                              "PFT",
+                                              "Season",
+                                              "Species",
+                                              "Mean VPD"),
+         cex=0.7)
+    text(4, l1+3, "Relative Response [95% CI]", pos = 2, cex = 0.7)
+    
+    
+    res_WUE <- rma.mv(WUE_resp, WUE_var, mods = ~Type*VPDmean, random = ~1|Dataset, data = wueDF)
+    
+    forest(res_WUE, slab=wueDF$Dataset, 
+           at=c(0.0, 0.5, 1.0, 1.5, 2.0, 2.5),
+           ilab=cbind(wueDF$PFT, wueDF$Season, wueDF$Species, wueDF$VPDmean),
+           ilab.xpos=c(-1.3,-1.0,-0.5, 3.0), cex=0.6)
+    text(c(-1.8,-1.3,-1.0,-0.5, 3.0), l1+3, c("Dataset", 
+                                              "PFT",
+                                              "Season",
+                                              "Species",
+                                              "Mean VPD"),
+         cex=0.7)
+    text(4, l1+3, "Relative Response [95% CI]", pos = 2, cex = 0.7)
+    
+    dev.off()
+    
     
     ### end
 }

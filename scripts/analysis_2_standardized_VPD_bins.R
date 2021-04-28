@@ -1,28 +1,14 @@
-break_data_by_VPD_bins_and_summarize_response_ratios <- function(inDF) {
+analysis_2_standardized_VPD_bins <- function(inDF, vpd.brks) {
     
-    ### To continue the meta-analysis, we will need to decide how to treat different VPD in different dataset and CO2 treatment
-    ### Two options:
-    ###             1. To bin VPD into categorical bins and then calculate CO2 response ratio within each bin
-    ###             2. To filter out outliers (i.e. outside 95th percentile), and then calcuklate 
-    ### Let's try categorize the dataset into different VPD bins first and see how it goes.
+    ### pass in the breaks
+    breaks <- vpd.brks
     
-    breaks <- c(seq(0, 6.8, 0.2))
-    
-    #tags <- c("[0-0.2)","[0.2-0.4)", "[0.4-0.6)", "[0.6-0.8)", "[0.8-1.0)", 
-    #          "[1.0-1.2)","[1.2-1.4)", "[1.4-1.6)","[1.6-1.8)", "[1.8-2.0)",
-    #          "[2.0-2.2)","[2.2-2.4)", "[2.4-2.6)","[2.6-2.8)", "[2.8-3.0)",
-    #          "[3.0-3.2)","[3.2-3.4)", "[3.4-3.6)","[3.6-3.8)", "[3.8-4.0)",
-    #          "[4.0-4.2)","[4.2-4.4)", "[4.4-4.6)","[4.6-4.8)", "[4.8-5.0)",
-    #          "[5.0-5.2)","[5.2-5.4)", "[5.4-5.6)","[5.6-5.8)", "[5.8-6.0)",
-    #          "[6.0-6.2)","[6.2-6.4)", "[6.4-6.6)")
+    ### seq
+    seq.val <- max(breaks)/(length(breaks)-1)
     
     
-    #tags <- c("[0-0.4)","[0.4-0.8)", "[0.8-1.2)", "[1.2-1.6)", "[1.6-2.0)", 
-    #          "[2.0-2.4)","[2.4-2.8)", "[2.8-3.2)","[3.2-3.6)", "[3.6-4.0)",
-    #          "[4.0-4.4)","[4.4-4.8)", "[4.8-5.2)","[5.2-5.6)", "[5.6-6.0)",
-    #          "[6.0-6.4)","[6.4-6.8)")
-    
-    tags <- c(seq(0.1, 6.7, 0.2))
+    tags <- c(seq(min(breaks)+(seq.val/2), max(breaks)-(seq.val/2), 
+                  by=seq.val))
     
     inDF$VPD_group <- cut(inDF$VPD, 
                           breaks=breaks, 
