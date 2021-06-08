@@ -141,9 +141,9 @@ analysis_2_standardized_VPD_bins <- function(inDF, vpd.brks) {
     
     ### make some plots
     p3 <- ggplot(sDF) +
-        geom_point(aes(VPD_group, Photo_resp, fill=Dataset, group=Dataset, pch=Type))+
-        geom_smooth(method = "lm", aes(VPD_group, Photo_resp, color=Type),
-                    se=F)+
+        geom_point(aes(VPD_group, Photo_resp, fill=Dataset, group=Dataset, pch=Type, size=1/Photo_var))+
+        #geom_smooth(method = "lm", aes(VPD_group, Photo_resp, color=Type),
+        #            se=F)+
         #geom_abline(slope=0, intercept=3, lty=2)+
         geom_abline(slope=0, intercept=1, lty=1)+
         theme_linedraw() +
@@ -161,8 +161,10 @@ analysis_2_standardized_VPD_bins <- function(inDF, vpd.brks) {
         ylab("Photosynthesis CO2 response")+
       scale_shape_manual(name="Type",
                          values=c("angiosperm"=21,
-                                  "gymnosperm"=22))
+                                  "gymnosperm"=22))+
+      scale_y_continuous(trans = "exp")
       
+    plot(p3)
     
     
     p4 <- ggplot(sDF) +
