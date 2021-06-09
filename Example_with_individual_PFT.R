@@ -69,6 +69,9 @@ p6_PFT <- ggplot() +
     guides(size=FALSE, shape=FALSE, fill = guide_legend(override.aes=list(shape=21, size=3)));p6_PFT
 
 
+pdf(paste0(getwd(), "/output/WUE_response_with_confidence_interval_for_individual_vegetation_type.pdf"),
+    width=6, height=6)
 plot(p6_PFT)
+dev.off()
 
 
