@@ -83,24 +83,46 @@ analysis_2_standardized_VPD_bins <- function(inDF, vpd.brks) {
 
     
     ### calculate response ratios
-    sDF$Photo_resp <- with(sDF, log(Photo.mean.eCO2/Photo.mean.aCO2)/log(CO2_resp))
-    sDF$Cond_resp <- with(sDF, log(Cond.mean.eCO2/Cond.mean.aCO2)/log(CO2_resp))
-    sDF$WUE_resp <- with(sDF, log(WUE.mean.eCO2/WUE.mean.aCO2)/log(CO2_resp))
+    #sDF$Photo_resp <- with(sDF, log(Photo.mean.eCO2/Photo.mean.aCO2)/log(CO2_resp))
+    #sDF$Cond_resp <- with(sDF, log(Cond.mean.eCO2/Cond.mean.aCO2)/log(CO2_resp))
+    #sDF$WUE_resp <- with(sDF, log(WUE.mean.eCO2/WUE.mean.aCO2)/log(CO2_resp))
+    
+    sDF$Photo_log_resp <- with(sDF, log((Photo.mean.eCO2/Photo.mean.aCO2)/CO2_resp))
+    sDF$Cond_log_resp <- with(sDF, log((Cond.mean.eCO2/Cond.mean.aCO2)/CO2_resp))
+    sDF$WUE_log_resp <- with(sDF, log((WUE.mean.eCO2/WUE.mean.aCO2)/CO2_resp))
     
     
+    sDF$Photo_resp <- with(sDF, (Photo.mean.eCO2/Photo.mean.aCO2)/CO2_resp)
+    sDF$Cond_resp <- with(sDF, (Cond.mean.eCO2/Cond.mean.aCO2)/CO2_resp)
+    sDF$WUE_resp <- with(sDF, (WUE.mean.eCO2/WUE.mean.aCO2)/CO2_resp)
+  
     ### calculate variance
     sDF$Photo_var <- with(sDF, 
                           (Photo.sd.eCO2 * Photo.sd.eCO2 / (Photo.n.eCO2 * Photo.mean.eCO2 * Photo.mean.eCO2) +
-                               Photo.sd.aCO2 * Photo.sd.aCO2 / (Photo.n.aCO2 * Photo.mean.aCO2 * Photo.mean.aCO2))/log(CO2_resp))
+                               Photo.sd.aCO2 * Photo.sd.aCO2 / (Photo.n.aCO2 * Photo.mean.aCO2 * Photo.mean.aCO2))/CO2_resp)
     
     sDF$Cond_var <- with(sDF, 
                          (Cond.sd.eCO2 * Cond.sd.eCO2 / (Cond.n.eCO2 * Cond.mean.eCO2 * Cond.mean.eCO2) +
-                              Cond.sd.aCO2 * Cond.sd.aCO2 / (Cond.n.aCO2 * Cond.mean.aCO2 * Cond.mean.aCO2))/log(CO2_resp))
+                              Cond.sd.aCO2 * Cond.sd.aCO2 / (Cond.n.aCO2 * Cond.mean.aCO2 * Cond.mean.aCO2))/CO2_resp)
     
     
     sDF$WUE_var <- with(sDF, 
                         (WUE.sd.eCO2 * WUE.sd.eCO2 / (WUE.n.eCO2 * WUE.mean.eCO2 * WUE.mean.eCO2) +
-                             WUE.sd.aCO2 * WUE.sd.aCO2 / (WUE.n.aCO2 * WUE.mean.aCO2 * WUE.mean.aCO2))/log(CO2_resp))
+                             WUE.sd.aCO2 * WUE.sd.aCO2 / (WUE.n.aCO2 * WUE.mean.aCO2 * WUE.mean.aCO2))/CO2_resp)
+    
+    
+    sDF$Photo_log_var <- with(sDF, 
+                          (Photo.sd.eCO2 * Photo.sd.eCO2 / (Photo.n.eCO2 * Photo.mean.eCO2 * Photo.mean.eCO2) +
+                             Photo.sd.aCO2 * Photo.sd.aCO2 / (Photo.n.aCO2 * Photo.mean.aCO2 * Photo.mean.aCO2))/log(CO2_resp))
+    
+    sDF$Cond_log_var <- with(sDF, 
+                         (Cond.sd.eCO2 * Cond.sd.eCO2 / (Cond.n.eCO2 * Cond.mean.eCO2 * Cond.mean.eCO2) +
+                            Cond.sd.aCO2 * Cond.sd.aCO2 / (Cond.n.aCO2 * Cond.mean.aCO2 * Cond.mean.aCO2))/log(CO2_resp))
+    
+    
+    sDF$WUE_log_var <- with(sDF, 
+                        (WUE.sd.eCO2 * WUE.sd.eCO2 / (WUE.n.eCO2 * WUE.mean.eCO2 * WUE.mean.eCO2) +
+                           WUE.sd.aCO2 * WUE.sd.aCO2 / (WUE.n.aCO2 * WUE.mean.aCO2 * WUE.mean.aCO2))/log(CO2_resp))
     
     
     ### add continuous factor for VPD values
@@ -144,8 +166,7 @@ analysis_2_standardized_VPD_bins <- function(inDF, vpd.brks) {
         geom_point(aes(VPD_group, Photo_resp, fill=Dataset, group=Dataset, pch=Type, size=1/Photo_var))+
         #geom_smooth(method = "lm", aes(VPD_group, Photo_resp, color=Type),
         #            se=F)+
-        #geom_abline(slope=0, intercept=3, lty=2)+
-        geom_abline(slope=0, intercept=1, lty=1)+
+        geom_abline(slope=0, intercept=0, lty=4)+
         theme_linedraw() +
         theme(panel.grid.minor=element_blank(),
               axis.title.x = element_text(size=12), 
@@ -162,7 +183,7 @@ analysis_2_standardized_VPD_bins <- function(inDF, vpd.brks) {
       scale_shape_manual(name="Type",
                          values=c("angiosperm"=21,
                                   "gymnosperm"=22))+
-      scale_y_continuous(trans = "exp")
+      scale_y_continuous(trans = "log", breaks=c(0, 0.5, 1, 2, 3, 4))
       
     plot(p3)
     
