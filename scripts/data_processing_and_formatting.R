@@ -1,7 +1,7 @@
 data_processing_and_formatting <- function() {
     
     ### read in data
-    myDF<- read.csv(paste0(getwd(), "/data/WUEdatabase_fixed.csv"))
+    myDF<- read.csv(paste0(getwd(), "/data/WUEdatabase_fixed_new.csv"))
     
     ### calculate WUE
     myDF$WUE <- with(myDF, Photo/Cond)
