@@ -298,18 +298,18 @@ g1_forest <- function(g1DF) {
   ### calculate response ratios   
   g1DF$g1_resp <- with(g1DF, log(g1_eCO2/g1_aCO2)) #Log or not logged? #have not '/log(CO2_resp)' either.
  
+  ### obtain sample size for each CO2 treatment of each dataset
+  
+  
+  ### convert from CI to standard deviation
+  g1DF$g1_aCO2_sd <- sqrt(g1DF$g1_aCO2_n) * (g1DF$highCI_aCO2 - g1DF$lowCI_aCO2) / 3.92
+  g1DF$g1_eCO2_sd <- sqrt(g1DF$g1_eCO2_n) * (g1DF$highCI_eCO2 - g1DF$lowCI_eCO2) / 3.92
+
   
   ### calculate variance
-  # ?? Not sure about this? 
-  g1DF$g1_var <- with(g1DF, 
-                        (lowCI_eCO2 * lowCI_eCO2 / (g1_eCO2 * g1_eCO2) +
-                           lowCI_aCO2 * lowCI_aCO2 / (g1_aCO2 * g1_aCO2)))
+  g1DF$g1_var <- with(g1DF, sqrt((g1_aCO2_sd^2 + g1_eCO2_sd^2)/2))
   
-  #### the previous code for Photo and WUE responses
-  #with(g1DF, 
-       #(Photo.sd.eCO2 * Photo.sd.eCO2 / (Photo.n.eCO2 * Photo.mean.eCO2 * Photo.mean.eCO2) +
-          #Photo.sd.aCO2 * Photo.sd.aCO2 / (Photo.n.aCO2 * Photo.mean.aCO2 * Photo.mean.aCO2))/log(CO2_resp))
-  
+
   
   #### Make simplified forest plot
   g1DF <- g1DF [complete.cases(g1DF$g1_resp),]
