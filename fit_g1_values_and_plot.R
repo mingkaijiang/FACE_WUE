@@ -3,14 +3,18 @@ fit_g1_values_and_plot <- function(inDF) {
   
   inDF <- myDF
   
+  inDF <- inDF[inDF$Dataset!="DeAngelis_Macchia",]
+  
   
   ### split by dataset
       inDF$fits <- paste0(inDF$Dataset, "-", inDF$Species, "-", inDF$Treatment)
 
+      ### exclude DeAngelis_Macchia-Pistacia lentiscus-Elevated CO2
+      #inDF <- inDF[inDF$fits!="DeAngelis_Macchia-Pistacia lentiscus-Elevated CO2",]
+      
       list <- split(inDF, inDF$fits)
      
       ### fit g1 values
-      
       fit <- lapply(list,fitBB,gsmodel="BBOpti",
                     varnames=list(VPD="VPD",ALEAF="Photo",GS="Cond",Ca="CO2S")) 
       lapply(fit,coef)
@@ -295,19 +299,35 @@ g1_forest <- function(g1DF) {
   #sDF$CO2_resp <- with(g1DF, CO2.mean.eCO2/CO2.mean.aCO2) 
   
   
-  ### calculate response ratios   
-  g1DF$g1_resp <- with(g1DF, log(g1_eCO2/g1_aCO2)) #Log or not logged? #have not '/log(CO2_resp)' either.
- 
   ### obtain sample size for each CO2 treatment of each dataset
+  inDF$count_variable <- 1.0
+  tmpDF <- summaryBy(count_variable~Dataset+Species+Treatment, FUN=sum,
+                     data=inDF, keep.names=T, na.rm=T)
   
+  outDF <- merge(g1DF, tmpDF, by.x=c("Dataset", "Species", "Treatment_aCO2"),
+                 by.y=c("Dataset", "Species", "Treatment"))
   
+  names(outDF)[names(outDF)=="count_variable"] <- "g1_aCO2_n"
+  
+  outDF <- merge(outDF, tmpDF, by.x=c("Dataset", "Species", "Treatment_eCO2"),
+                 by.y=c("Dataset", "Species", "Treatment"))
+  
+  names(outDF)[names(outDF)=="count_variable"] <- "g1_eCO2_n"
+  
+  g1DF <- outDF
+  
+ 
+  ### calculate response ratios   
+  g1DF$g1_resp <- with(g1DF, g1_eCO2/g1_aCO2)  #Log or not logged? #have not '/log(CO2_resp)' either.
+  #g1DF$log_g1_resp <- with(g1DF, log(g1_eCO2/g1_aCO2))
+    
   ### convert from CI to standard deviation
   g1DF$g1_aCO2_sd <- sqrt(g1DF$g1_aCO2_n) * (g1DF$highCI_aCO2 - g1DF$lowCI_aCO2) / 3.92
   g1DF$g1_eCO2_sd <- sqrt(g1DF$g1_eCO2_n) * (g1DF$highCI_eCO2 - g1DF$lowCI_eCO2) / 3.92
 
-  
+
   ### calculate variance
-  g1DF$g1_var <- with(g1DF, sqrt((g1_aCO2_sd^2 + g1_eCO2_sd^2)/2))
+  g1DF$g1_var <- with(g1DF, g1_resp*sqrt(((g1_aCO2_sd/g1_aCO2)^2 + (g1_eCO2_sd/g1_eCO2)^2)/2))
   
 
   
@@ -329,8 +349,8 @@ g1_forest <- function(g1DF) {
          xlim=c(-10, 10),
          ylim=c(0, 29),
          rows=c(24:11,9:7,5:1),
-         at=c(-2,-1,-0.5,0,0.5,1,2),
-         refline=0,
+         at=c(-2,-1,-0.5,0,0.5,1,2,3),
+         refline=1,
          mlab="", psize=1, 
          cex=0.6,
          order=order(g1DF$PFT,g1DF$Dataset,g1DF$Species),
