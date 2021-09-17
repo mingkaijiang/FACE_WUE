@@ -43,7 +43,8 @@ make_combined_forest_plot <- function() {
     
     
     ### merge the rma result together
-    rmaDF <- data.frame("Dataset" = "Overall",
+    rmaDF <- data.frame("Dataset" = rep(c("EBF overall", "DBF overall", "ENF overall"), 
+                                        length=3),
                         "Variable" = rep(c("WUE", "Cond", "Photo"), each = 3),
                         "PFT" = rep(c("EBF", "DBF", "ENF"), length=3),
                         "Mean" = NA,
@@ -79,6 +80,9 @@ make_combined_forest_plot <- function() {
     
     rmaDF$Mean[rmaDF$Variable=="Photo"&rmaDF$PFT=="ENF"] <- res_Photo_ENF_S$b
     rmaDF$SE[rmaDF$Variable=="Photo"&rmaDF$PFT=="ENF"] <- res_Photo_ENF_S$se
+    
+    rmaDF$alpha <- "Overall"
+    
     
     ### prepare individual dataset entries - WUE
     tmpDF1 <- wueDF.angE[,c("Dataset", "Species", "PFT", "WUE_resp", "WUE_var")]
@@ -154,6 +158,8 @@ make_combined_forest_plot <- function() {
     indDF$Species <- NULL
     indDF <- indDF[,c("Dataset", "Variable", "PFT", "Mean", "SE")]
     
+    indDF$alpha <- "Individual"
+    
     ### merge with the rmaDF
     plotDF <- rbind(rmaDF, indDF)
     
@@ -165,84 +171,84 @@ make_combined_forest_plot <- function() {
 
     ### plot order
     plotDF$Dataset <- gsub("Rhnlndr, P.tremuloides", 
-                           "01_Rhnlndr, P.tremuloides",
+                           "02_Rhnlndr, P.tremuloides",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("Rhnlndr, B.papyrifera", 
-                           "02_Rhnlndr, B.papyrifera",
+                           "03_Rhnlndr, B.papyrifera",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("R_Glncrs, B.pendula", 
-                           "03_R_Glncrs, B.pendula",
+                           "04_R_Glncrs, B.pendula",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("POPFACE, P.nigra", 
-                           "04_POPFACE, P.nigra",
+                           "05_POPFACE, P.nigra",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("POPFACE, P.euramericana", 
-                           "05_POPFACE, P.euramericana",
+                           "06_POPFACE, P.euramericana",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("POPFACE, P.alba", 
-                           "06_POPFACE, P.alba",
+                           "07_POPFACE, P.alba",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("ORNL, L.styraciflua", 
-                           "07_ORNL, L.styraciflua",
+                           "08_ORNL, L.styraciflua",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("L_SCC, Q.petraea", 
-                           "08_L_SCC, Q.petraea",
+                           "09_L_SCC, Q.petraea",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("L_SCC, F.sylvatica", 
-                           "09_L_SCC, F.sylvatica",
+                           "10_L_SCC, F.sylvatica",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("Grbskv, F.sylvatica", 
-                           "10_Grbskv, F.sylvatica",
+                           "11_Grbskv, F.sylvatica",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("BIFOR, Q.robur", 
-                           "11_BIFOR, Q.robur",
+                           "12_BIFOR, Q.robur",
                            plotDF$Dataset)
     
-    plotDF$Dataset[plotDF$PFT=="DBF"&plotDF$Dataset=="Overall"] <- "12_Overall"
+    plotDF$Dataset[plotDF$PFT=="DBF"&plotDF$Dataset=="DBF overall"] <- "01_DEB_Overall"
     
     
     plotDF$Dataset <- gsub("Rchmnd_2, E.globulus", 
-                           "01_Rchmnd_2, E.globulus",
+                           "02_Rchmnd_2, E.globulus",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("Rchmnd_1, E.saligna", 
-                           "01_Rchmnd_1, E.saligna",
+                           "03_Rchmnd_1, E.saligna",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("EucFACE, E.tereticornis", 
-                           "03_EucFACE, E.tereticornis",
+                           "04_EucFACE, E.tereticornis",
                            plotDF$Dataset)
     
-    plotDF$Dataset[plotDF$PFT=="EBF"&plotDF$Dataset=="Overall"] <- "04_Overall"
+    plotDF$Dataset[plotDF$PFT=="EBF"&plotDF$Dataset=="EBF overall"] <- "01_EBF_Overall"
     
     
     plotDF$Dataset <- gsub("Flkldn, P.abies", 
-                           "01_Flkldn, P.abies",
+                           "02_Flkldn, P.abies",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("Flkldn_2, P.abies", 
-                           "02_Flkldn_2, P.abies",
+                           "03_Flkldn_2, P.abies",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("Duke, P.taeda", 
-                           "03_Duke, P.taeda",
+                           "04_Duke, P.taeda",
                            plotDF$Dataset)
     
     plotDF$Dataset <- gsub("B_SCC, P.abies", 
-                           "04_B_SCC, P.abies",
+                           "05_B_SCC, P.abies",
                            plotDF$Dataset)
     
-    plotDF$Dataset[plotDF$PFT=="ENF"&plotDF$Dataset=="Overall"] <- "05_Overall"
+    plotDF$Dataset[plotDF$PFT=="ENF"&plotDF$Dataset=="ENF overall"] <- "01_ENF_Overall"
     
     
     ### re-order
@@ -251,5 +257,351 @@ make_combined_forest_plot <- function() {
     
     ### make multi-panel plot
     
+    ## WUE, EBF
+    plotDF1 <- plotDF[plotDF$Variable=="WUE"&plotDF$PFT=="EBF",]
     
+    p1 <- ggplot(plotDF1)+ 
+        geom_vline(xintercept = 1.0, lty=2)+
+        geom_hline(yintercept = 1.5, lty=1)+
+        geom_errorbarh(aes(y=Dataset, xmin=Mean-SE, xmax=Mean+SE), 
+                       col="purple", height=0.3) + 
+        geom_point(aes(y=Dataset, x=Mean, alpha=alpha), 
+                   fill="purple",
+                   size=4, shape=21)+
+        labs(x="", y="")+
+        theme_linedraw()+
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_text(size=12),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=12),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              plot.title = element_text(hjust=0.5,
+                                        size = 12, face = "bold"),
+              legend.position = "none",
+              legend.background = element_rect(fill="white",
+                                               size=0.5, linetype="solid", 
+                                               colour ="black"))+
+        scale_x_continuous(limits=c(0,2))+
+        scale_y_discrete(labels=c(plotDF1$Lab))+
+        scale_alpha_manual(name="",
+                             limits=c("Individual", "Overall"),
+                             values=c(0.5, 1))+
+        ggtitle("(a)")+
+        guides(fill = guide_legend(title.position = "top"))+
+        ggtitle("Water-Use Efficiency")
+    
+    
+    ## WUE, DBF
+    plotDF2 <- plotDF[plotDF$Variable=="WUE"&plotDF$PFT=="DBF",]
+    
+    p2 <- ggplot(plotDF2)+ 
+        geom_vline(xintercept = 1.0, lty=2)+
+        geom_hline(yintercept = 1.5, lty=1)+
+        geom_errorbarh(aes(y=Dataset, xmin=Mean-SE, xmax=Mean+SE), 
+                       col="green", height=0.3) + 
+        geom_point(aes(y=Dataset, x=Mean, alpha=alpha), 
+                   fill="green",
+                   size=4, shape=21)+
+        labs(x="", y="")+
+        theme_linedraw()+
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_text(size=12),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=12),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              plot.title = element_text(size = 12, face = "bold"),
+              legend.position = "none",
+              legend.background = element_rect(fill="white",
+                                               size=0.5, linetype="solid", 
+                                               colour ="black"))+
+        scale_x_continuous(limits=c(0.,2))+
+        scale_y_discrete(labels=c(plotDF2$Lab))+
+        scale_alpha_manual(name="",
+                           limits=c("Individual", "Overall"),
+                           values=c(0.5, 1))+
+        ggtitle("(b)")+
+        guides(fill = guide_legend(title.position = "top"))
+    
+    
+    ## WUE, ENF
+    plotDF3 <- plotDF[plotDF$Variable=="WUE"&plotDF$PFT=="ENF",]
+    
+    p3 <- ggplot(plotDF3)+ 
+        geom_vline(xintercept = 1.0, lty=2)+
+        geom_hline(yintercept = 1.5, lty=1)+
+        geom_errorbarh(aes(y=Dataset, xmin=Mean-SE, xmax=Mean+SE), 
+                       col="blue3", height=0.3) + 
+        geom_point(aes(y=Dataset, x=Mean, alpha=alpha), 
+                   fill="blue3",
+                   size=4, shape=21)+
+        labs(x="", y="")+
+        theme_linedraw()+
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_text(size=12),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=12),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              plot.title = element_text(size = 12, face = "bold"),
+              legend.position = "none",
+              legend.background = element_rect(fill="white",
+                                               size=0.5, linetype="solid", 
+                                               colour ="black"))+
+        scale_x_continuous(name = "Relative Response (95% CI)",
+                               limits=c(0.,2))+
+        scale_y_discrete(labels=c(plotDF3$Lab))+
+        scale_alpha_manual(name="",
+                           limits=c("Individual", "Overall"),
+                           values=c(0.5, 1))+
+        ggtitle("(c)")+
+        guides(fill = guide_legend(title.position = "top"))
+    
+    
+    
+    
+    ## Photo, EBF
+    plotDF4 <- plotDF[plotDF$Variable=="Photo"&plotDF$PFT=="EBF",]
+    
+    p4 <- ggplot(plotDF4)+ 
+        geom_vline(xintercept = 1.0, lty=2)+
+        geom_hline(yintercept = 1.5, lty=1)+
+        geom_errorbarh(aes(y=Dataset, xmin=Mean-SE, xmax=Mean+SE), 
+                       col="purple", height=0.3) + 
+        geom_point(aes(y=Dataset, x=Mean, alpha=alpha), 
+                   fill="purple",
+                   size=4, shape=21)+
+        labs(x="", y="")+
+        theme_linedraw()+
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_blank(),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=12),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              plot.title = element_text(hjust=0.5,
+                                        size = 12, face = "bold"),
+              legend.position = "none",
+              legend.background = element_rect(fill="white",
+                                               size=0.5, linetype="solid", 
+                                               colour ="black"))+
+        scale_x_continuous(limits=c(0,2.5))+
+        scale_y_discrete(labels=c(plotDF4$Lab))+
+        scale_alpha_manual(name="",
+                           limits=c("Individual", "Overall"),
+                           values=c(0.5, 1))+
+        ggtitle("(d)")+
+        guides(fill = guide_legend(title.position = "top"))+
+        ggtitle("Photosynthesis")
+    
+    
+    ## Photo, DBF
+    plotDF5 <- plotDF[plotDF$Variable=="Photo"&plotDF$PFT=="DBF",]
+    
+    p5 <- ggplot(plotDF5)+ 
+        geom_vline(xintercept = 1.0, lty=2)+
+        geom_hline(yintercept = 1.5, lty=1)+
+        geom_errorbarh(aes(y=Dataset, xmin=Mean-SE, xmax=Mean+SE), 
+                       col="green", height=0.3) + 
+        geom_point(aes(y=Dataset, x=Mean, alpha=alpha), 
+                   fill="green",
+                   size=4, shape=21)+
+        labs(x="", y="")+
+        theme_linedraw()+
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_blank(),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=12),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              plot.title = element_text(size = 12, face = "bold"),
+              legend.position = "none",
+              legend.background = element_rect(fill="white",
+                                               size=0.5, linetype="solid", 
+                                               colour ="black"))+
+        scale_x_continuous(limits=c(0.,2.5))+
+        scale_y_discrete(labels=c(plotDF5$Lab))+
+        scale_alpha_manual(name="",
+                           limits=c("Individual", "Overall"),
+                           values=c(0.5, 1))+
+        ggtitle("(e)")+
+        guides(fill = guide_legend(title.position = "top"))
+    
+    
+    ## photo, ENF
+    plotDF6 <- plotDF[plotDF$Variable=="Photo"&plotDF$PFT=="ENF",]
+    
+    p6 <- ggplot(plotDF6)+ 
+        geom_vline(xintercept = 1.0, lty=2)+
+        geom_hline(yintercept = 1.5, lty=1)+
+        geom_errorbarh(aes(y=Dataset, xmin=Mean-SE, xmax=Mean+SE), 
+                       col="blue3", height=0.3) + 
+        geom_point(aes(y=Dataset, x=Mean, alpha=alpha), 
+                   fill="blue3",
+                   size=4, shape=21)+
+        labs(x="", y="")+
+        theme_linedraw()+
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_blank(),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=12),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              plot.title = element_text(size = 12, face = "bold"),
+              legend.position = "none",
+              legend.background = element_rect(fill="white",
+                                               size=0.5, linetype="solid", 
+                                               colour ="black"))+
+        scale_x_continuous(name = "Relative Response (95% CI)",
+                           limits=c(0.,2.5))+
+        scale_y_discrete(labels=c(plotDF6$Lab))+
+        scale_alpha_manual(name="",
+                           limits=c("Individual", "Overall"),
+                           values=c(0.5, 1))+
+        ggtitle("(f)")+
+        guides(fill = guide_legend(title.position = "top"))
+    
+    
+    
+    ## Cond, EBF
+    plotDF7 <- plotDF[plotDF$Variable=="Cond"&plotDF$PFT=="EBF",]
+    
+    p7 <- ggplot(plotDF7)+ 
+        geom_vline(xintercept = 0.0, lty=2)+
+        geom_hline(yintercept = 1.5, lty=1)+
+        geom_errorbarh(aes(y=Dataset, xmin=Mean-SE, xmax=Mean+SE), 
+                       col="purple", height=0.3) + 
+        geom_point(aes(y=Dataset, x=Mean, alpha=alpha), 
+                   fill="purple",
+                   size=4, shape=21)+
+        labs(x="", y="")+
+        theme_linedraw()+
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_blank(),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=12),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              plot.title = element_text(hjust=0.5,
+                                        size = 12, face = "bold"),
+              legend.position = "none",
+              legend.background = element_rect(fill="white",
+                                               size=0.5, linetype="solid", 
+                                               colour ="black"))+
+        scale_x_continuous(limits=c(-1,1.5))+
+        scale_y_discrete(labels=c(plotDF7$Lab))+
+        scale_alpha_manual(name="",
+                           limits=c("Individual", "Overall"),
+                           values=c(0.5, 1))+
+        ggtitle("(g)")+
+        guides(fill = guide_legend(title.position = "top"))+
+        ggtitle("Conductance")
+    
+    
+    ## Cond, DBF
+    plotDF8 <- plotDF[plotDF$Variable=="Cond"&plotDF$PFT=="DBF",]
+    
+    p8 <- ggplot(plotDF8)+ 
+        geom_vline(xintercept = 0.0, lty=2)+
+        geom_hline(yintercept = 1.5, lty=1)+
+        geom_errorbarh(aes(y=Dataset, xmin=Mean-SE, xmax=Mean+SE), 
+                       col="green", height=0.3) + 
+        geom_point(aes(y=Dataset, x=Mean, alpha=alpha), 
+                   fill="green",
+                   size=4, shape=21)+
+        labs(x="", y="")+
+        theme_linedraw()+
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_blank(),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=12),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              plot.title = element_text(size = 12, face = "bold"),
+              legend.position = "none",
+              legend.background = element_rect(fill="white",
+                                               size=0.5, linetype="solid", 
+                                               colour ="black"))+
+        scale_x_continuous(limits=c(-1,1.5))+
+        scale_y_discrete(labels=c(plotDF8$Lab))+
+        scale_alpha_manual(name="",
+                           limits=c("Individual", "Overall"),
+                           values=c(0.5, 1))+
+        ggtitle("(h)")+
+        guides(fill = guide_legend(title.position = "top"))
+    
+    
+    ## Cond, ENF
+    plotDF9 <- plotDF[plotDF$Variable=="Cond"&plotDF$PFT=="ENF",]
+    
+    p9 <- ggplot(plotDF9)+ 
+        geom_vline(xintercept = 0.0, lty=2)+
+        geom_hline(yintercept = 1.5, lty=1)+
+        geom_errorbarh(aes(y=Dataset, xmin=Mean-SE, xmax=Mean+SE), 
+                       col="blue3", height=0.3) + 
+        geom_point(aes(y=Dataset, x=Mean, alpha=alpha), 
+                   fill="blue3",
+                   size=4, shape=21)+
+        labs(x="", y="")+
+        theme_linedraw()+
+        theme(panel.grid.minor=element_blank(),
+              axis.title.x = element_text(size=12), 
+              axis.text.x = element_text(size=12),
+              axis.text.y=element_blank(),
+              axis.title.y=element_text(size=12),
+              legend.text=element_text(size=12),
+              legend.title=element_text(size=12),
+              panel.grid.major=element_blank(),
+              plot.title = element_text(size = 12, face = "bold"),
+              legend.position = "none",
+              legend.background = element_rect(fill="white",
+                                               size=0.5, linetype="solid", 
+                                               colour ="black"))+
+        scale_x_continuous(name = "Relative Response (95% CI)",
+                           limits=c(-1,1.5))+
+        scale_y_discrete(labels=c(plotDF9$Lab))+
+        scale_alpha_manual(name="",
+                           limits=c("Individual", "Overall"),
+                           values=c(0.5, 1))+
+        ggtitle("(i)")+
+        guides(fill = guide_legend(title.position = "top"))
+    
+    
+    pdf("output/check.pdf", 
+        width=14, height=8)
+    plot_grid(p1, p4, p7,
+              p2, p5, p8,
+              p3, p6, p9,
+              #rel_widths=c(1.5,1,1),
+              rel_heights=c(0.6,1.2,0.7),
+              label_x=0.8,
+              label_y=0.9,
+              labels="AUTO", 
+              ncol=3, 
+              align="hv", 
+              axis = "l")    
+    dev.off()
+    
+    ## to do:
+    ## 1. add inset labels
+    ## 2. work on margins between plots
+    ## 3. bald text
+
 }
