@@ -256,6 +256,14 @@ make_combined_forest_plot <- function() {
     
     
     ### make multi-panel plot
+    #MakeExp <- function(x,y){
+    #    exp <- vector(length = 0, mode = "expression")
+    #    for (i in seq_along(x)) {
+    #        if (i %in% y) exp[[i]] <- bquote(bold(.(x[i])))
+    #        else exp[[i]] <- x[i]
+    #    }
+    #    return(exp)
+    #}
     
     ## WUE, EBF
     plotDF1 <- plotDF[plotDF$Variable=="WUE"&plotDF$PFT=="EBF",]
@@ -285,13 +293,16 @@ make_combined_forest_plot <- function() {
                                                size=0.5, linetype="solid", 
                                                colour ="black"))+
         scale_x_continuous(limits=c(0,2))+
-        scale_y_discrete(labels=c(plotDF1$Lab))+
+        #scale_y_discrete(labels=c(plotDF1$Lab))+
+        #scale_y_discrete(labels=MakeExp(plotDF1$Lab, c("EBF overall")))+
+        scale_y_discrete(labels=c(expression(bold("EBF overall")),
+                                  plotDF1$Lab[2:4]))+
         scale_alpha_manual(name="",
                              limits=c("Individual", "Overall"),
                              values=c(0.5, 1))+
-        ggtitle("(a)")+
+        #ggtitle("(a)")+
         guides(fill = guide_legend(title.position = "top"))+
-        ggtitle("Water-Use Efficiency")
+        ggtitle("Water-Use Efficiency"); p1
     
     
     ## WUE, DBF
@@ -321,11 +332,14 @@ make_combined_forest_plot <- function() {
                                                size=0.5, linetype="solid", 
                                                colour ="black"))+
         scale_x_continuous(limits=c(0.,2))+
-        scale_y_discrete(labels=c(plotDF2$Lab))+
+        #scale_y_discrete(labels=c(plotDF2$Lab))+
+        #scale_y_discrete(labels=MakeExp(plotDF2$Lab, "EDF overall"))+
+        scale_y_discrete(labels=c(expression(bold("EDF overall")),
+                                  plotDF2$Lab[2:12]))+
         scale_alpha_manual(name="",
                            limits=c("Individual", "Overall"),
                            values=c(0.5, 1))+
-        ggtitle("(b)")+
+        #ggtitle("(b)")+
         guides(fill = guide_legend(title.position = "top"))
     
     
@@ -357,11 +371,14 @@ make_combined_forest_plot <- function() {
                                                colour ="black"))+
         scale_x_continuous(name = "Relative Response (95% CI)",
                                limits=c(0.,2))+
-        scale_y_discrete(labels=c(plotDF3$Lab))+
+        #scale_y_discrete(labels=c(plotDF3$Lab))+
+        #scale_y_discrete(labels=MakeExp(plotDF3$Lab, "ENF overall"))+
+        scale_y_discrete(labels=c(expression(bold("ENF overall")),
+                                  plotDF3$Lab[2:5]))+
         scale_alpha_manual(name="",
                            limits=c("Individual", "Overall"),
                            values=c(0.5, 1))+
-        ggtitle("(c)")+
+        #ggtitle("(c)")+
         guides(fill = guide_legend(title.position = "top"))
     
     
@@ -399,7 +416,7 @@ make_combined_forest_plot <- function() {
         scale_alpha_manual(name="",
                            limits=c("Individual", "Overall"),
                            values=c(0.5, 1))+
-        ggtitle("(d)")+
+        #ggtitle("(d)")+
         guides(fill = guide_legend(title.position = "top"))+
         ggtitle("Photosynthesis")
     
@@ -435,7 +452,7 @@ make_combined_forest_plot <- function() {
         scale_alpha_manual(name="",
                            limits=c("Individual", "Overall"),
                            values=c(0.5, 1))+
-        ggtitle("(e)")+
+        #ggtitle("(e)")+
         guides(fill = guide_legend(title.position = "top"))
     
     
@@ -471,7 +488,7 @@ make_combined_forest_plot <- function() {
         scale_alpha_manual(name="",
                            limits=c("Individual", "Overall"),
                            values=c(0.5, 1))+
-        ggtitle("(f)")+
+        #ggtitle("(f)")+
         guides(fill = guide_legend(title.position = "top"))
     
     
@@ -508,7 +525,7 @@ make_combined_forest_plot <- function() {
         scale_alpha_manual(name="",
                            limits=c("Individual", "Overall"),
                            values=c(0.5, 1))+
-        ggtitle("(g)")+
+        #ggtitle("(g)")+
         guides(fill = guide_legend(title.position = "top"))+
         ggtitle("Conductance")
     
@@ -544,7 +561,7 @@ make_combined_forest_plot <- function() {
         scale_alpha_manual(name="",
                            limits=c("Individual", "Overall"),
                            values=c(0.5, 1))+
-        ggtitle("(h)")+
+        #ggtitle("(h)")+
         guides(fill = guide_legend(title.position = "top"))
     
     
@@ -580,28 +597,48 @@ make_combined_forest_plot <- function() {
         scale_alpha_manual(name="",
                            limits=c("Individual", "Overall"),
                            values=c(0.5, 1))+
-        ggtitle("(i)")+
+        #ggtitle("(i)")+
         guides(fill = guide_legend(title.position = "top"))
     
     
+    plot_1 <- plot_grid(p1, p2, p3,
+                        labels=c("(a)", "(b)", "(c)"),
+                        rel_heights=c(0.6,1.2,0.7),
+                        ncol=1, 
+                        align="vh", 
+                        axis = "l",
+                        label_x=0.4, 
+                        label_y=c(0.85, 0.9, 0.85),
+                        label_size = 18)
+    
+    plot_2 <- plot_grid(p4, p5, p6,
+                        labels=c("(d)", "(e)", "(f)"),
+                        rel_heights=c(0.6,1.2,0.7),
+                        ncol=1, 
+                        align="vh", 
+                        axis = "l",
+                        label_x=0.1, 
+                        label_y=c(0.85, 0.9, 0.85),
+                        label_size = 18)
+    
+    plot_3 <- plot_grid(p7, p8, p9,
+                        labels=c("(g)", "(h)", "(i)"),
+                        rel_heights=c(0.6,1.2,0.7),
+                        ncol=1, 
+                        align="vh", 
+                        axis = "l",
+                        label_x=0.1, 
+                        label_y=c(0.85, 0.9, 0.85),
+                        label_size = 18)
+    
     pdf("output/check.pdf", 
         width=14, height=8)
-    plot_grid(p1, p4, p7,
-              p2, p5, p8,
-              p3, p6, p9,
-              #rel_widths=c(1.5,1,1),
-              rel_heights=c(0.6,1.2,0.7),
-              label_x=0.8,
-              label_y=0.9,
-              labels="AUTO", 
+    plot_grid(plot_1, plot_2, plot_3,
+              rel_widths=c(1.5,1,1),
+              labels="", 
               ncol=3, 
               align="hv", 
               axis = "l")    
     dev.off()
     
-    ## to do:
-    ## 1. add inset labels
-    ## 2. work on margins between plots
-    ## 3. bald text
-
 }
