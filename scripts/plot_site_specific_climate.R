@@ -18,7 +18,7 @@ plot_site_specific_climate <- function(inDF) {
               legend.text.align=0)+
         xlab("VPD (kPa)")+
         scale_fill_manual(values=c("Ambient CO2"="blue2",
-                                   "Elevated CO2"="red3"))
+                                   "Elevated CO2"="red3")); p1
     
     
     ### CO2S
